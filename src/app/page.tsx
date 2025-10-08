@@ -17,8 +17,9 @@ export default function HomePage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
       if (error) setErr(error.message);
       else window.location.href = "/dashboard";
-    } catch (e: any) {
-      setErr(e?.message ?? "Ukjent feil");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Ukjent feil";
+      setErr(msg);
     } finally {
       setLoading(false);
     }
