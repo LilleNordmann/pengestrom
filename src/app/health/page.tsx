@@ -1,3 +1,1 @@
-export default function Health() {
-  return <main style={{padding:24}}>OK ✅ /health</main>;
-}
+export default function Health(){ return <main style={{padding:24}}>OK ✅ /health</main>; }
