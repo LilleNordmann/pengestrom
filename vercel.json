@@ -1,0 +1,8 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm ci && npm run build",
+  "env": {
+    "NODE_VERSION": "20",
+    "NEXT_TURBOPACK": "0"
+  }
+}
