@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -11,9 +11,14 @@ export default function HomePage() {
 
   async function signIn() {
     setErr(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
-    if (error) setErr(error.message);
-    else window.location.href = "/dashboard";
+    try {
+      const supabase = getSupabase();
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+      if (error) setErr(error.message);
+      else window.location.href = "/dashboard";
+    } catch (e: any) {
+      setErr(e?.message ?? "Ukjent feil – mangler env?");
+    }
   }
 
   return (
@@ -25,9 +30,6 @@ export default function HomePage() {
              value={pw} onChange={e=>setPw(e.target.value)} />
       {err && <p className="text-sm text-red-600">{err}</p>}
       <button onClick={signIn} className="w-full rounded bg-black py-2 text-white">Logg inn</button>
-      <p className="text-sm text-neutral-500">
-        Har du ikke bruker? Opprett i Supabase Auth (Email+Password), eller legg til sign-up senere.
-      </p>
       <p className="text-xs"><Link href="/dashboard" className="underline">Hopp til dashboard</Link> (for test)</p>
     </main>
   );
