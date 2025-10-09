@@ -2,8 +2,8 @@
   "name": "Pengestrøm",
   "short_name": "Pengestrøm",
   "icons": [
-    { "src": "/pengestrom_icon_big_192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/pengestrom_icon_big_512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/pengestrom_icon_ultratight_192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/pengestrom_icon_ultratight_512.png", "sizes": "512x512", "type": "image/png" }
   ],
   "theme_color": "#000000",
   "background_color": "#000000",
