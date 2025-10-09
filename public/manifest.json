@@ -1,6 +1,9 @@
 {
   "name": "Pengestrøm",
   "short_name": "Pengestrøm",
+  "description": "Budsjett, lønn og lån i nettleseren",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "icons": [
     { "src": "/icons/pengestrom_icon_ultralight_192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/pengestrom_icon_ultralight_512.png", "sizes": "512x512", "type": "image/png" }

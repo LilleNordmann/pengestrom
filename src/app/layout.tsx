@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import InstallPWAButton from '@/components/InstallPWAButton';
 
 export const metadata: Metadata = {
   title: "Pengestrøm",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="no">
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Pengestrøm"></meta>
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="icon" href="/icons/pengestrom_logo.svg" type="image/svg+xml" />
         <link rel="alternate icon" href="/favicon.ico" />
