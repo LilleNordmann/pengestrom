@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <g font-family="Inter, Satoshi, Manrope, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+     font-weight="900"
+     text-rendering="geometricPrecision"
+     dominant-baseline="middle"
+     text-anchor="middle"
+     transform="translate(256,256)">
+
+    <text x="-76" y="0" font-size="300" fill="#FFFFFF">P</text>
+    <text x="78"  y="0" font-size="220" fill="#1EC37B">S</text>
+  </g>
+</svg>
