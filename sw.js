@@ -1,4 +1,4 @@
-const CACHE = 'pengestrom-v1';
+const CACHE = 'pengestrom-v2';
 const FILES = [
   '/',
   '/index.html',

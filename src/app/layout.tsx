@@ -23,18 +23,18 @@ export const metadata: Metadata = {
     // Favicons
     icon: [
       { url: '/favicon.ico' }, // fallback for eldre/Windows
-      { url: '/icons/pengestrom_logo.svg', type: 'image/svg+xml' },
-      { url: '/icons/pengestrom_icon_ultralight_32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/pengestrom_icon_ultralight_64.png', sizes: '64x64', type: 'image/png' },
-      { url: '/icons/pengestrom_icon_ultralight_128.png', sizes: '128x128', type: 'image/png' },
+      { url: '/icons/pengestrom-logo.svg', type: 'image/svg+xml' },
+      { url: '/icons/pengestrom-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/pengestrom-64.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icons/pengestrom-128.png', sizes: '128x128', type: 'image/png' },
     ],
     // Apple touch (du har 192 – funker; kan lage 180 senere)
     apple: [
-      { url: '/icons/pengestrom_icon_ultralight_192.png', sizes: '192x192' },
+      { url: '/icons/pengestrom-192.png', sizes: '192x192' },
     ],
     // Safari pinned tab (må være monokrom)
     other: [
-      { rel: 'mask-icon', url: '/icons/pengestrom_logo_mono.svg', color: '#000000' },
+      { rel: 'mask-icon', url: '/icons/pengestrom-monokrom.svg', color: '#000000' },
     ],
   },
 
