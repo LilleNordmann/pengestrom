@@ -1,39 +1,41 @@
 /* src/app/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* === Design tokens === */
 :root {
-  --background: #000000;  /* helsvart bakgrunn */
+  --background: #000000;  /* helsvart */
   --foreground: #ffffff;  /* hvit tekst */
 }
 
-/* Beholder Tailwind v4 @theme-variabler */
+/* Tailwind v4 @theme-variabler (beholder font-variablene dine) */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Bruker CSS-variabel fra fonten du laster i layout.tsx (Inter -> --font-sans) */
   --font-sans: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* === Base-stiler === */
+/* === Base === */
 @layer base {
   html { color-scheme: dark; }
   html, body { min-height: 100%; }
+
   body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
   }
 
-  a { @apply text-white no-underline; }
-  a:hover { @apply opacity-80; }
+  /* Unngå @apply i v4 – bruk ren CSS */
+  a {
+    color: var(--foreground);
+    text-decoration: none;
+  }
+  a:hover { opacity: 0.8; }
 }
 
 /* === Utilities === */
 @layer utilities {
-  /* Padding for iOS når statuslinjen er black-translucent */
+  /* For iOS statuslinje (black-translucent) */
   .safe-top { padding-top: env(safe-area-inset-top); }
 }
