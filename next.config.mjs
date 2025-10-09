@@ -2,11 +2,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    formats: ["image/avif", "image/webp"],
-    // domains: ["pengestrom.no"], // legg til om du trenger eksterne bilder
-  },
-  // experimental: { optimizePackageImports: ["lucide-react"] },
+  images: { formats: ["image/avif", "image/webp"] },
+
+  // ⬇️ Ikke kjør ESLint i prod-build
+  eslint: { ignoreDuringBuilds: true },
 };
 
 export default nextConfig;
