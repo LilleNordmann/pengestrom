@@ -1,35 +1,61 @@
 // src/app/layout.tsx
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
 import InstallPWAButton from '@/components/InstallPWAButton';
 
 export const metadata: Metadata = {
-  title: "Pengestrøm",
-  description: "Budsjett, lønn og lån i nettleseren",
-  // <-- fjern themeColor her hvis den lå her før
+  title: 'Pengestrøm',
+  description: 'Budsjett, lønn og lån i nettleseren',
+
+  // PWA
+  manifest: '/manifest.json',
+  themeColor: '#000000',
+
+  // iOS / Safari
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Pengestrøm',
+  },
+
+  // Ikoner (bruker dine ultralight-filer)
+  icons: {
+    // Favicons
+    icon: [
+      { url: '/favicon.ico' }, // fallback for eldre/Windows
+      { url: '/icons/pengestrom_logo.svg', type: 'image/svg+xml' },
+      { url: '/icons/pengestrom_icon_ultralight_32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/pengestrom_icon_ultralight_64.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icons/pengestrom_icon_ultralight_128.png', sizes: '128x128', type: 'image/png' },
+    ],
+    // Apple touch (du har 192 – funker; kan lage 180 senere)
+    apple: [
+      { url: '/icons/pengestrom_icon_ultralight_192.png', sizes: '192x192' },
+    ],
+    // Safari pinned tab (må være monokrom)
+    other: [
+      { rel: 'mask-icon', url: '/icons/pengestrom_logo_mono.svg', color: '#000000' },
+    ],
+  },
+
+  // Chromium anbefaler denne i tillegg
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 };
 
 export const viewport: Viewport = {
-  // én farge for hele appen (passer PWA + svart bakgrunn)
-  themeColor: "#000000",
-  // (valgfritt) si tydelig at appen er dark
-  colorScheme: "dark",
+  themeColor: '#000000',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="no">
-      <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Pengestrøm"></meta>
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="icon" href="/icons/pengestrom_logo.svg" type="image/svg+xml" />
-        <link rel="alternate icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/icons/pengestrom_icon_ultralight_192.png" />
-        <link rel="mask-icon" href="/icons/pengestrom_logo.svg" color="#000000" />
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <InstallPWAButton />
+      </body>
     </html>
   );
 }
