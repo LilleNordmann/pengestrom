@@ -30,7 +30,7 @@ export default function HomePage() {
     <main className="min-h-[100svh] bg-black text-white flex flex-col items-center justify-center px-6 pt-[env(safe-area-inset-top)]">
       {/* Logo */}
       <Image
-        src="/pengestrom_icon_big_192.png"
+        src="/icons/pengestrom_icon_ultralight_192.png"
         alt="Pengestrøm logo"
         width={180}
         height={180}
