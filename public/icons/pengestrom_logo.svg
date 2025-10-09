@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Svart plate med avrundede hjørner -->
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="#000000"/>
+
+  <!-- PS sentrert; P større enn S; ultratett spacing -->
+  <g font-family="Inter, Satoshi, Manrope, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+     font-weight="900"
+     text-rendering="geometricPrecision"
+     dominant-baseline="middle"
+     text-anchor="middle"
+     transform="translate(256,270)">
+
+    <!-- P (hvit, større) -->
+    <text x="-76" y="0" font-size="300" fill="#FFFFFF">P</text>
+
+    <!-- S (grønn, litt mindre). Juster x for tettere/løsere spacing -->
+    <text x="78" y="0" font-size="220" fill="#1EC37B">S</text>
+  </g>
+</svg>
