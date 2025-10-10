@@ -10,6 +10,11 @@ export default function SalaryPage() {
   // --- Satser ---
   const [hourly, setHourly] = useState<number>(250);
 
+  // Egen visningsstreng for redigerbar timelønn (for å vise 2 desimaler med komma)
+  const formatNOK = (n: number) =>
+    n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const [hourlyStr, setHourlyStr] = useState<string>(formatNOK(hourly));
+
   // Skift
   const [shiftYes, setShiftYes] = useState<boolean>(true);
   const [shiftMode, setShiftMode] = useState<ShiftMode>('kr');
@@ -63,38 +68,27 @@ export default function SalaryPage() {
 
   const utbetalt = brutto - totalSkatt;
 
-  // --- utils ---
-  const NOK = (n: number) =>
-    n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // --- helpers ---
+  const NOK = (n: number) => formatNOK(n);
 
-  const SmallNum = ({
-    value,
-    onChange,
-    step = 1,
-    min = 0,
-    w = 80,
-  }: {
-    value: number;
-    onChange: (v: number) => void;
-    step?: number;
-    min?: number;
-    w?: number;
-  }) => (
-    <input
-      type="number"
-      style={{
-        width: w,
-        background: 'var(--input-soft)',
-        borderColor: 'var(--input-ring)',
-        color: 'var(--input-fg)',
-      }}
-      className="rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
-      value={Number.isFinite(value) ? value : 0}
-      step={step}
-      min={min}
-      onChange={(e) => onChange(parseFloat(e.target.value || '0'))}
-    />
-  );
+  // parser for tekstfelt med norsk komma
+  const parseNOK = (s: string): number | null => {
+    const cleaned = s.replace(/\s/g, '').replace(',', '.');
+    const val = parseFloat(cleaned);
+    return Number.isFinite(val) ? val : null;
+  };
+
+  // onBlur for timelønn (formatter til 2 desimaler)
+  const commitHourly = () => {
+    const parsed = parseNOK(hourlyStr);
+    if (parsed === null) {
+      // tilbakestill til gjeldende verdi
+      setHourlyStr(formatNOK(hourly));
+      return;
+    }
+    setHourly(parsed);
+    setHourlyStr(formatNOK(parsed));
+  };
 
   return (
     <main className="mx-auto max-w-[680px] p-4">
@@ -104,19 +98,17 @@ export default function SalaryPage() {
       >
         <h1 className="mb-4 text-center text-2xl font-extrabold">Lønnsutregning</h1>
 
-        {/* Toppsatser */}
-        <div
-          className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3"
-        >
-          <TopLine
+        {/* Toppsatser (første er redigerbar med 2 desimaler, de to andre er visning – ikke input) */}
+        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <TopLineEditable
             label="Du har"
-            editable
-            value={hourly}
-            onChange={setHourly}
+            valueStr={hourlyStr}
+            setValueStr={setHourlyStr}
+            onBlur={commitHourly}
             tail="i timelønn"
           />
-          <TopLine label="Ved 50% overtid har du" value={ot50Rate} tail="i timelønn" />
-          <TopLine label="Ved 100% overtid har du" value={ot100Rate} tail="i timelønn" />
+          <TopLineDisplay label="Ved 50% overtid har du" value={NOK(ot50Rate)} tail="i timelønn" />
+          <TopLineDisplay label="Ved 100% overtid har du" value={NOK(ot100Rate)} tail="i timelønn" />
         </div>
 
         {/* Skift */}
@@ -137,7 +129,8 @@ export default function SalaryPage() {
             <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
               <MiniLine
                 label="Kveldstillegg"
-                left="kr"
+                left={shiftMode === 'kr' ? 'kr' : '%'}
+                right={shiftMode === 'kr' ? 'i tillegg' : 'av timelønn'}
                 input={
                   <SmallNum
                     value={kveldTillegg}
@@ -145,12 +138,11 @@ export default function SalaryPage() {
                     step={shiftMode === 'kr' ? 1 : 0.5}
                   />
                 }
-                right="i tillegg"
-                mode={shiftMode}
               />
               <MiniLine
                 label="Natttillegg"
-                left="kr"
+                left={shiftMode === 'kr' ? 'kr' : '%'}
+                right={shiftMode === 'kr' ? 'i tillegg' : 'av timelønn'}
                 input={
                   <SmallNum
                     value={nattTillegg}
@@ -158,8 +150,6 @@ export default function SalaryPage() {
                     step={shiftMode === 'kr' ? 1 : 0.5}
                   />
                 }
-                right="i tillegg"
-                mode={shiftMode}
               />
             </div>
           )}
@@ -173,7 +163,7 @@ export default function SalaryPage() {
           Skriv inn timene du har jobbet
         </div>
 
-        {/* Timer-tabell venstre + Timer-tekst høyre */}
+        {/* Timer */}
         <div className="mb-4 grid gap-2">
           <TimeRow label="Vanlige timer jobbet">
             <SmallNum value={hVanlig} onChange={setHVanlig} step={0.25} />
@@ -249,19 +239,20 @@ export default function SalaryPage() {
   );
 }
 
-/* ========== Små komponenter som matcher excel-look ========== */
+/* ====== Små komponenter ====== */
 
-function TopLine({
+// Øverste venstre: redigerbar timelønn med 2 desimaler (tekst-input som formatteres på blur)
+function TopLineEditable({
   label,
-  value,
-  onChange,
-  editable = false,
+  valueStr,
+  setValueStr,
+  onBlur,
   tail,
 }: {
   label: string;
-  value: number;
-  onChange?: (v: number) => void;
-  editable?: boolean;
+  valueStr: string;
+  setValueStr: (s: string) => void;
+  onBlur: () => void;
   tail?: string;
 }) {
   return (
@@ -272,28 +263,49 @@ function TopLine({
       <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
       <div className="mt-1 flex items-center gap-2">
         <span className="text-sm font-bold">kr</span>
-        {editable ? (
-          <input
-            type="number"
-            className="w-[90px] rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
-            style={{
-              background: 'var(--input-soft)',
-              borderColor: 'var(--input-ring)',
-              color: 'var(--input-fg)',
-            }}
-            value={value}
-            step={1}
-            min={0}
-            onChange={(e) => onChange?.(parseFloat(e.target.value || '0'))}
-          />
-        ) : (
-          <input
-            disabled
-            className="w-[90px] rounded-md px-2 py-1 text-right font-semibold"
-            style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
-            value={value.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          />
-        )}
+        <input
+          inputMode="decimal"
+          className="w-[90px] rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
+          style={{
+            background: 'var(--input-soft)',
+            borderColor: 'var(--input-ring)',
+            color: 'var(--input-fg)',
+          }}
+          value={valueStr}
+          onChange={(e) => setValueStr(e.target.value)}
+          onBlur={onBlur}
+        />
+        {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
+      </div>
+    </div>
+  );
+}
+
+// Øverste midt & høyre: kun visning – ser ikke ut som input
+function TopLineDisplay({
+  label,
+  value,
+  tail,
+}: {
+  label: string;
+  value: string;
+  tail?: string;
+}) {
+  return (
+    <div
+      className="rounded-lg px-3 py-2"
+      style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
+    >
+      <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
+      <div className="mt-1 flex items-center gap-2">
+        <span className="text-sm font-bold">kr</span>
+        <div
+          className="w-[90px] rounded-md px-2 py-1 text-right font-semibold"
+          style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
+          aria-readonly="true"
+        >
+          {value}
+        </div>
         {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
       </div>
     </div>
@@ -318,13 +330,11 @@ function MiniLine({
   left,
   input,
   right,
-  mode,
 }: {
   label: string;
   left?: string;
   input: React.ReactNode;
   right?: string;
-  mode: ShiftMode;
 }) {
   return (
     <div>
@@ -334,14 +344,43 @@ function MiniLine({
         style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold">{mode === 'kr' ? left : '%'}</span>
+          {left ? <span className="text-sm font-bold">{left}</span> : null}
           {input}
         </div>
-        <span className="text-xs" style={{ color: 'var(--muted)' }}>
-          {mode === 'kr' ? right : 'av timelønn'}
-        </span>
+        {right ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{right}</span> : null}
       </div>
     </div>
+  );
+}
+
+function SmallNum({
+  value,
+  onChange,
+  step = 1,
+  min = 0,
+  w = 80,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  step?: number;
+  min?: number;
+  w?: number;
+}) {
+  return (
+    <input
+      type="number"
+      style={{
+        width: w,
+        background: 'var(--input-soft)',
+        borderColor: 'var(--input-ring)',
+        color: 'var(--input-fg)',
+      }}
+      className="rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
+      value={Number.isFinite(value) ? value : 0}
+      step={step}
+      min={min}
+      onChange={(e) => onChange(parseFloat(e.target.value || '0'))}
+    />
   );
 }
 
