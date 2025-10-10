@@ -8,6 +8,8 @@ type Props = {
   onChange?: (v: string) => void;
   editable?: boolean;
   width?: number;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 export default function MoneyBox({ value, onChange, editable = false, width = 90 }: Props) {

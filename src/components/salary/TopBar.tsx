@@ -34,7 +34,7 @@ export default function TopBar({
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === 'Enter') onCommitHourly();
             }}
-            onBlur={onCommitHourly as any}
+            onBlur={onCommitHourly}
           />
         </InlineBlock>
 
