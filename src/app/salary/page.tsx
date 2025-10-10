@@ -4,13 +4,10 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
-type Gate = 'ok';
 type ShiftMode = 'kr' | '%';
 
 export default function SalaryPage() {
-  const gate: Gate = 'ok';
-
-  // --- Inndata: satser ---
+  // --- Satser ---
   const [hourly, setHourly] = useState<number>(250);
 
   // Skift
@@ -19,7 +16,7 @@ export default function SalaryPage() {
   const [kveldTillegg, setKveldTillegg] = useState<number>(20); // kr eller %
   const [nattTillegg, setNattTillegg] = useState<number>(50);   // kr eller %
 
-  // --- Inndata: timer ---
+  // --- Timer ---
   const [hVanlig, setHVanlig] = useState<number>(150);
   const [hHellig, setHHellig] = useState<number>(16);
   const [hKveld, setHKveld] = useState<number>(40);
@@ -27,7 +24,7 @@ export default function SalaryPage() {
   const [hOT50, setHOT50] = useState<number>(4);
   const [hOT100, setHOT100] = useState<number>(5);
 
-  // --- Skatt-input ---
+  // --- Skatt ---
   const [tabelltrekkKr, setTabelltrekkKr] = useState<number>(8060);
   const [overtidSkattProsent, setOvertidSkattProsent] = useState<number>(35);
 
@@ -70,278 +67,179 @@ export default function SalaryPage() {
   const NOK = (n: number) =>
     n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  const Num = ({
+  const SmallNum = ({
     value,
     onChange,
     step = 1,
     min = 0,
-    suffix,
-    w = 'w-28',
-    centered = false,
+    w = 80,
   }: {
     value: number;
     onChange: (v: number) => void;
     step?: number;
     min?: number;
-    suffix?: string;
-    w?: string;
-    centered?: boolean;
+    w?: number;
   }) => (
-    <div className={`flex items-center gap-2 ${centered ? 'justify-center' : ''}`}>
-      {/* ren "kr"/"%" håndteres uten bakgrunn i kallet */}
-      <input
-        type="number"
-        className={`${w} rounded-lg px-3 py-2 text-right font-semibold outline-none ring-1 focus:ring-2`}
-        style={{
-          background: 'var(--input-soft)',
-          borderColor: 'var(--input-ring)',
-          color: 'var(--input-fg)',
-        }}
-        value={Number.isFinite(value) ? value : 0}
-        step={step}
-        min={min}
-        onChange={(e) => onChange(parseFloat(e.target.value || '0'))}
-      />
-      {suffix ? <span className="text-sm" style={{ color: 'var(--muted)' }}>{suffix}</span> : null}
-    </div>
+    <input
+      type="number"
+      style={{
+        width: w,
+        background: 'var(--input-soft)',
+        borderColor: 'var(--input-ring)',
+        color: 'var(--input-fg)',
+      }}
+      className="rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
+      value={Number.isFinite(value) ? value : 0}
+      step={step}
+      min={min}
+      onChange={(e) => onChange(parseFloat(e.target.value || '0'))}
+    />
   );
 
-  if (gate !== 'ok') return null;
-
   return (
-    <main className="mx-auto max-w-4xl p-6">
+    <main className="mx-auto max-w-[680px] p-4">
       <div
-        className="rounded-2xl border p-6 shadow-sm"
+        className="rounded-2xl border p-5"
         style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
       >
-        <h1 className="mb-6 text-center text-3xl font-extrabold">Lønnsutregning</h1>
+        <h1 className="mb-4 text-center text-2xl font-extrabold">Lønnsutregning</h1>
 
-        {/* Øvre satser-panel: timelønn + autoutregnet 50/100% */}
-        <section
-          className="mb-6 rounded-xl p-4"
-          style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
+        {/* Toppsatser */}
+        <div
+          className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3"
         >
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <TopCard
-              label="Du har"
-              editable
-              value={hourly}
-              onChange={setHourly}
-              trailing="i timelønn"
-              prefix="kr"
-            />
-            <TopCard
-              label="Ved 50% overtid har du"
-              value={ot50Rate}
-              trailing="i timelønn"
-              prefix="kr"
-            />
-            <TopCard
-              label="Ved 100% overtid har du"
-              value={ot100Rate}
-              trailing="i timelønn"
-              prefix="kr"
-            />
+          <TopLine
+            label="Du har"
+            editable
+            value={hourly}
+            onChange={setHourly}
+            tail="i timelønn"
+          />
+          <TopLine label="Ved 50% overtid har du" value={ot50Rate} tail="i timelønn" />
+          <TopLine label="Ved 100% overtid har du" value={ot100Rate} tail="i timelønn" />
+        </div>
+
+        {/* Skift */}
+        <div className="mb-2">
+          <div className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>Jobber du skift</div>
+          <div className="mt-1 flex gap-2">
+            <Chip label="JA" active={shiftYes} onClick={() => setShiftYes(true)} />
+            <Chip label="NEI" active={!shiftYes} onClick={() => setShiftYes(false)} />
           </div>
-        </section>
 
-        {/* Skift-tillegg: JA/NEI + kr/% + felt for kveld/natt */}
-        <section className="mb-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>
-                Jobber du skift
-              </div>
-              <div className="flex gap-2">
-                <Toggle
-                  label="JA"
-                  active={shiftYes}
-                  onClick={() => setShiftYes(true)}
-                />
-                <Toggle
-                  label="NEI"
-                  active={!shiftYes}
-                  onClick={() => setShiftYes(false)}
-                />
-              </div>
+          <div className="mt-2 text-xs font-semibold" style={{ color: 'var(--muted)' }}>Skifttillegg i</div>
+          <div className="mt-1 flex gap-2">
+            <Chip label="Prosent" active={shiftMode === '%'} onClick={() => setShiftMode('%')} />
+            <Chip label="Kroner" active={shiftMode === 'kr'} onClick={() => setShiftMode('kr')} />
+          </div>
 
-              {shiftYes && (
-                <>
-                  <div className="mt-3 text-sm font-semibold" style={{ color: 'var(--muted)' }}>
-                    Skifttillegg i
-                  </div>
-                  <div className="flex gap-2">
-                    <Toggle
-                      label="Prosent"
-                      active={shiftMode === '%'}
-                      onClick={() => setShiftMode('%')}
-                    />
-                    <Toggle
-                      label="Kroner"
-                      active={shiftMode === 'kr'}
-                      onClick={() => setShiftMode('kr')}
-                    />
-                  </div>
-                </>
-              )}
+          {shiftYes && (
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <MiniLine
+                label="Kveldstillegg"
+                left="kr"
+                input={
+                  <SmallNum
+                    value={kveldTillegg}
+                    onChange={setKveldTillegg}
+                    step={shiftMode === 'kr' ? 1 : 0.5}
+                  />
+                }
+                right="i tillegg"
+                mode={shiftMode}
+              />
+              <MiniLine
+                label="Natttillegg"
+                left="kr"
+                input={
+                  <SmallNum
+                    value={nattTillegg}
+                    onChange={setNattTillegg}
+                    step={shiftMode === 'kr' ? 1 : 0.5}
+                  />
+                }
+                right="i tillegg"
+                mode={shiftMode}
+              />
             </div>
+          )}
+        </div>
 
-            {shiftYes && (
-              <div className="grid max-w-md grid-cols-2 gap-4">
-                <LabeledInput
-                  label="Kveldstillegg"
-                  prefix={shiftMode === 'kr' ? 'kr' : '%'}
-                  input={
-                    <Num
-                      value={kveldTillegg}
-                      onChange={setKveldTillegg}
-                      step={shiftMode === 'kr' ? 1 : 0.5}
-                      min={0}
-                    />
-                  }
-                  suffix={shiftMode === 'kr' ? 'i tillegg' : 'av timelønn'}
-                />
-                <LabeledInput
-                  label="Nattstillegg"
-                  prefix={shiftMode === 'kr' ? 'kr' : '%'}
-                  input={
-                    <Num
-                      value={nattTillegg}
-                      onChange={setNattTillegg}
-                      step={shiftMode === 'kr' ? 1 : 0.5}
-                      min={0}
-                    />
-                  }
-                  suffix={shiftMode === 'kr' ? 'i tillegg' : 'av timelønn'}
-                />
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Skriv inn timene */}
-        <section
-          className="mb-6 rounded-xl p-4 text-center"
+        {/* Separator: Skriv inn timene */}
+        <div
+          className="my-4 rounded-lg px-3 py-2 text-center text-sm font-semibold"
           style={{ border: '1px solid var(--border)' }}
         >
-          <h2 className="text-xl font-semibold">Skriv inn timene du har jobbet</h2>
-        </section>
+          Skriv inn timene du har jobbet
+        </div>
 
-        {/* Kun venstre kolonne med timer (høyre kolonne fjernet) */}
-        <section className="mb-8 grid grid-cols-1 gap-3">
-          <InputRow label="Vanlige timer jobbet">
-            <Num value={hVanlig} onChange={setHVanlig} step={0.25} min={0} suffix="Timer" />
-          </InputRow>
-          <InputRow label="Helligdag">
-            <Num value={hHellig} onChange={setHHellig} step={0.25} min={0} suffix="Timer" />
-          </InputRow>
-          <InputRow label="Kveld">
-            <Num value={hKveld} onChange={setHKveld} step={0.25} min={0} suffix="Timer" />
-          </InputRow>
-          <InputRow label="Natt">
-            <Num value={hNatt} onChange={setHNatt} step={0.25} min={0} suffix="Timer" />
-          </InputRow>
-          <InputRow label="50% overtid">
-            <Num value={hOT50} onChange={setHOT50} step={0.25} min={0} suffix="Timer" />
-          </InputRow>
-          <InputRow label="100% overtid">
-            <Num value={hOT100} onChange={setHOT100} step={0.25} min={0} suffix="Timer" />
-          </InputRow>
-        </section>
+        {/* Timer-tabell venstre + Timer-tekst høyre */}
+        <div className="mb-4 grid gap-2">
+          <TimeRow label="Vanlige timer jobbet">
+            <SmallNum value={hVanlig} onChange={setHVanlig} step={0.25} />
+          </TimeRow>
+          <TimeRow label="Helligdag">
+            <SmallNum value={hHellig} onChange={setHHellig} step={0.25} />
+          </TimeRow>
+          <TimeRow label="Kveld">
+            <SmallNum value={hKveld} onChange={setHKveld} step={0.25} />
+          </TimeRow>
+          <TimeRow label="Natt">
+            <SmallNum value={hNatt} onChange={setHNatt} step={0.25} />
+          </TimeRow>
+          <TimeRow label="50% overtid">
+            <SmallNum value={hOT50} onChange={setHOT50} step={0.25} />
+          </TimeRow>
+          <TimeRow label="100% overtid">
+            <SmallNum value={hOT100} onChange={setHOT100} step={0.25} />
+          </TimeRow>
+        </div>
 
-        {/* Brutto lønn tabell */}
-        <section className="mb-6">
-          <h3 className="mb-2 text-xl font-semibold">Brutto Lønn</h3>
-          <div className="overflow-hidden rounded-xl" style={{ border: '1px solid var(--border)' }}>
-            <TableRow title="Timelønn" value={NOK(timelonn)} />
-            <TableRow title="Kveld" value={NOK(kveld)} />
-            <TableRow title="Natt" value={NOK(natt)} />
-            <TableRow title="50% overtid" value={NOK(ot50)} />
-            <TableRow title="100% overtid" value={NOK(ot100)} />
+        {/* Brutto Lønn */}
+        <div className="mt-4">
+          <div className="mb-2 text-center text-sm font-semibold">Brutto Lønn</div>
+          <KVRow k="Timelønn" v={NOK(timelonn)} />
+          <KVRow k="Kveld" v={NOK(kveld)} />
+          <KVRow k="Natt" v={NOK(natt)} />
+          <KVRow k="50% overtid" v={NOK(ot50)} />
+          <KVRow k="100% overtid" v={NOK(ot100)} />
+        </div>
+
+        {/* Total Brutto */}
+        <BarRow label="Total Bruttolønn" value={`kr ${NOK(brutto)}`} />
+
+        {/* Skatt – Tabelltrekk */}
+        <PanelWarn>
+          <KVHeader k="Brutto til tabelltrekk" v={`kr ${NOK(bruttoTilTabell)}`} />
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt Tabelltrekk</span>
+            <SmallNum value={tabelltrekkKr} onChange={setTabelltrekkKr} step={100} w={90} />
           </div>
-        </section>
+          <KVFoot label="Sum tabelltrekk" value={`kr ${NOK(tabelltrekkKr)}`} />
+        </PanelWarn>
 
-        <section
-          className="mb-6 rounded-xl p-4 text-xl font-semibold"
-          style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="tracking-wide">Total Bruttolønn</span>
-            <span className="tabular-nums">kr {NOK(brutto)}</span>
+        {/* Skatt – Overtid prosenttrekk */}
+        <PanelWarn>
+          <KVHeader k="Brutto Overtid" v={`kr ${NOK(bruttoOvertid)}`} />
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt prosenttrekk</span>
+            <SmallNum value={overtidSkattProsent} onChange={setOvertidSkattProsent} step={1} w={70} />
+            <span className="text-sm" style={{ color: 'var(--muted)' }}>%</span>
           </div>
-        </section>
+          <KVFoot label="Sum prosenttrekk" value={`kr ${NOK(skattOvertid)}`} />
+        </PanelWarn>
 
-        {/* Skattetrekk */}
-        <section className="mb-6 grid grid-cols-1 gap-4">
-          <div
-            className="rounded-xl p-4"
-            style={{ background: 'var(--panel-warn)', border: '1px solid var(--warn-border)' }}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-medium">Brutto til tabelltrekk</span>
-              <span className="tabular-nums">kr {NOK(bruttoTilTabell)}</span>
-            </div>
-            {/* Sentrert input */}
-            <div className="mt-2 flex w-full items-center justify-center">
-              <div className="flex items-center gap-2">
-                <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt Tabelltrekk</span>
-                <Num value={tabelltrekkKr} onChange={setTabelltrekkKr} step={100} min={0} centered w="w-32" />
-              </div>
-            </div>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'var(--muted)' }}>Sum tabelltrekk</span>
-              <div className="tabular-nums">kr {NOK(tabelltrekkKr)}</div>
-            </div>
-          </div>
-
-          <div
-            className="rounded-xl p-4"
-            style={{ background: 'var(--panel-warn)', border: '1px solid var(--warn-border)' }}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-medium">Brutto Overtid</span>
-              <span className="tabular-nums">kr {NOK(bruttoOvertid)}</span>
-            </div>
-            {/* Sentrert input */}
-            <div className="mt-2 flex w-full items-center justify-center">
-              <div className="flex items-center gap-2">
-                <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt prosenttrekk</span>
-                <Num value={overtidSkattProsent} onChange={setOvertidSkattProsent} step={1} min={0} centered w="w-20" />
-                <span className="text-sm" style={{ color: 'var(--muted)' }}>%</span>
-              </div>
-            </div>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'var(--muted)' }}>Sum prosenttrekk</span>
-              <div className="tabular-nums">kr {NOK(skattOvertid)}</div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="mb-6 rounded-xl p-4 text-xl font-semibold"
-          style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="tracking-wide">Totalt Skattetrekk</span>
-            <span className="tabular-nums">kr {NOK(totalSkatt)}</span>
-          </div>
-        </section>
+        {/* Totalt skattetrekk */}
+        <BarRow label="Totalt Skattetrekk" value={`kr ${NOK(totalSkatt)}`} />
 
         {/* Utbetalt */}
-        <section
-          className="mb-8 rounded-xl p-4 text-xl font-semibold"
-          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="tracking-wide">Utbetalt</span>
-            <span className="tabular-nums">kr {NOK(utbetalt)}</span>
-          </div>
-        </section>
+        <BarRow label="Utbetalt" value={`kr ${NOK(utbetalt)}`} tone="neutral" />
 
-        <div className="flex justify-center">
+        {/* Neste */}
+        <div className="mt-5 flex justify-center">
           <Link
             href="/"
-            className="w-full rounded-2xl bg-white py-4 text-center font-semibold text-black transition hover:opacity-90 md:w-72"
+            className="w-full max-w-[260px] rounded-2xl bg-white py-3 text-center font-semibold text-black transition hover:opacity-90"
           >
             Neste
           </Link>
@@ -351,35 +249,33 @@ export default function SalaryPage() {
   );
 }
 
-/* ---- Hjelpekomponenter ---- */
+/* ========== Små komponenter som matcher excel-look ========== */
 
-function TopCard({
+function TopLine({
   label,
   value,
   onChange,
   editable = false,
-  trailing,
-  prefix = 'kr',
+  tail,
 }: {
   label: string;
   value: number;
   onChange?: (v: number) => void;
   editable?: boolean;
-  trailing?: string;
-  prefix?: 'kr' | '%';
+  tail?: string;
 }) {
   return (
     <div
-      className="flex items-center justify-between gap-3 rounded-lg px-3 py-2"
+      className="rounded-lg px-3 py-2"
       style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
     >
-      <span className="text-sm">{label}</span>
-      <div className="flex min-w-[240px] items-center justify-between gap-2">
-        <span className="text-sm font-extrabold">{prefix}</span>
+      <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
+      <div className="mt-1 flex items-center gap-2">
+        <span className="text-sm font-bold">kr</span>
         {editable ? (
           <input
             type="number"
-            className="w-28 rounded-lg px-3 py-2 text-right font-semibold outline-none ring-1 focus:ring-2"
+            className="w-[90px] rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
             style={{
               background: 'var(--input-soft)',
               borderColor: 'var(--input-ring)',
@@ -393,88 +289,123 @@ function TopCard({
         ) : (
           <input
             disabled
-            className="w-28 rounded-lg px-3 py-2 text-right font-semibold"
+            className="w-[90px] rounded-md px-2 py-1 text-right font-semibold"
             style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
             value={value.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           />
         )}
-        {trailing ? <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>{trailing}</span> : null}
+        {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
       </div>
     </div>
   );
 }
 
-function Toggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-3 py-1 text-sm font-semibold transition ${
-        active ? 'opacity-100' : 'opacity-60'
-      }`}
-      style={{
-        background: 'var(--input-soft)',
-        border: `1px solid var(--input-ring)`,
-        color: 'var(--input-fg)',
-      }}
+      className={`rounded-full px-3 py-1 text-xs font-semibold transition ${active ? 'opacity-100' : 'opacity-60'}`}
+      style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
     >
       {label}
     </button>
   );
 }
 
-function LabeledInput({
+function MiniLine({
   label,
-  prefix,
+  left,
   input,
-  suffix,
+  right,
+  mode,
 }: {
   label: string;
-  prefix?: string;
+  left?: string;
   input: React.ReactNode;
-  suffix?: string;
+  right?: string;
+  mode: ShiftMode;
 }) {
   return (
-    <div
-      className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 ring-1"
-      style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-    >
-      <div className="flex items-center gap-2">
-        {prefix ? <span className="text-sm font-extrabold">{prefix}</span> : null}
-        {input}
+    <div>
+      <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
+      <div
+        className="mt-1 flex items-center justify-between gap-2 rounded-lg px-3 py-2"
+        style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold">{mode === 'kr' ? left : '%'}</span>
+          {input}
+        </div>
+        <span className="text-xs" style={{ color: 'var(--muted)' }}>
+          {mode === 'kr' ? right : 'av timelønn'}
+        </span>
       </div>
-      {suffix ? <span className="text-sm" style={{ color: 'var(--muted)' }}>{suffix}</span> : null}
     </div>
   );
 }
 
-function InputRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function TimeRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div
-      className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl px-3 py-2"
+      className="grid grid-cols-[1fr_auto_auto] items-center rounded-lg px-3 py-2"
       style={{ border: '1px solid var(--border)' }}
     >
-      <div className="text-sm">{label}</div>
+      <div className="text-xs">{label}</div>
       <div className="flex items-center">{children}</div>
+      <div className="pl-3 text-xs" style={{ color: 'var(--muted)' }}>Timer</div>
     </div>
   );
 }
 
-function TableRow({ title, value }: { title: string; value: string }) {
+function KVRow({ k, v }: { k: string; v: string }) {
   return (
     <div
-      className="grid grid-cols-[1fr_auto_auto] items-center px-3 py-2 last:border-0"
+      className="grid grid-cols-[1fr_auto_auto] items-center px-3 py-1"
       style={{ borderBottom: '1px solid var(--border)' }}
     >
-      <div className="text-sm" style={{ color: 'var(--muted)' }}>{title}</div>
-      <div className="mx-3 w-6 text-right text-sm font-semibold">kr</div>
-      <div className="tabular-nums">{value}</div>
+      <div className="text-xs" style={{ color: 'var(--muted)' }}>{k}</div>
+      <div className="mx-3 w-6 text-right text-xs font-semibold">kr</div>
+      <div className="tabular-nums text-sm">{v}</div>
+    </div>
+  );
+}
+
+function BarRow({ label, value, tone = 'accent' }: { label: string; value: string; tone?: 'accent' | 'neutral' }) {
+  const bg = tone === 'accent' ? 'var(--panel-accent)' : 'var(--card)';
+  const bd = tone === 'accent' ? 'var(--accent-border)' : 'var(--border)';
+  return (
+    <div className="my-3 rounded-lg px-3 py-2 text-sm font-semibold" style={{ background: bg, border: `1px solid ${bd}` }}>
+      <div className="flex items-center justify-between">
+        <span>{label}</span>
+        <span className="tabular-nums">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function PanelWarn({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="my-3 rounded-lg p-3" style={{ background: 'var(--panel-warn)', border: '1px solid var(--warn-border)' }}>
+      {children}
+    </div>
+  );
+}
+
+function KVHeader({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="font-medium">{k}</span>
+      <span className="tabular-nums">{v}</span>
+    </div>
+  );
+}
+
+function KVFoot({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="mt-2 flex items-center justify-between">
+      <span className="text-xs" style={{ color: 'var(--muted)' }}>{label}</span>
+      <span className="tabular-nums">{value}</span>
     </div>
   );
 }
