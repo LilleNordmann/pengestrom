@@ -3,25 +3,22 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import TopBar from '@/components/salary/TopBar';
 
 type ShiftMode = 'kr' | '%';
 
 export default function SalaryPage() {
-  // --- Satser ---
   const [hourly, setHourly] = useState<number>(250);
 
-  // Formatter/visningsstreng for timelønn (2 desimaler, norsk komma)
   const formatNOK = (n: number) =>
     n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const [hourlyStr, setHourlyStr] = useState<string>(formatNOK(hourly));
 
-  // Skift
   const [shiftYes, setShiftYes] = useState<boolean>(true);
   const [shiftMode, setShiftMode] = useState<ShiftMode>('kr');
-  const [kveldTillegg, setKveldTillegg] = useState<number>(20); // kr eller %
-  const [nattTillegg, setNattTillegg] = useState<number>(50);   // kr eller %
+  const [kveldTillegg, setKveldTillegg] = useState<number>(20);
+  const [nattTillegg, setNattTillegg] = useState<number>(50);
 
-  // --- Timer ---
   const [hVanlig, setHVanlig] = useState<number>(150);
   const [hHellig, setHHellig] = useState<number>(16);
   const [hKveld, setHKveld] = useState<number>(40);
@@ -29,15 +26,12 @@ export default function SalaryPage() {
   const [hOT50, setHOT50] = useState<number>(4);
   const [hOT100, setHOT100] = useState<number>(5);
 
-  // --- Skatt ---
   const [tabelltrekkKr, setTabelltrekkKr] = useState<number>(8060);
   const [overtidSkattProsent, setOvertidSkattProsent] = useState<number>(35);
 
-  // --- Avledede satser ---
   const ot50Rate = useMemo(() => hourly * 1.5, [hourly]);
   const ot100Rate = useMemo(() => hourly * 2, [hourly]);
 
-  // --- Beregninger ---
   const baseHours = hVanlig + hHellig;
   const timelonn = baseHours * hourly;
 
@@ -60,7 +54,7 @@ export default function SalaryPage() {
 
   const brutto = timelonn + kveld + natt + ot50 + ot100;
 
-  const bruttoTilTabell = timelonn + kveld + natt; // overtid holdes utenfor tabelltrekk
+  const bruttoTilTabell = timelonn + kveld + natt;
   const bruttoOvertid = ot50 + ot100;
 
   const skattOvertid = bruttoOvertid * (overtidSkattProsent / 100);
@@ -68,7 +62,6 @@ export default function SalaryPage() {
 
   const utbetalt = brutto - totalSkatt;
 
-  // --- helpers ---
   const NOK = (n: number) => formatNOK(n);
 
   const parseNOK = (s: string): number | null => {
@@ -77,7 +70,6 @@ export default function SalaryPage() {
     return Number.isFinite(val) ? val : null;
   };
 
-  // onBlur for timelønn (formatter til 2 desimaler)
   const commitHourly = () => {
     const parsed = parseNOK(hourlyStr);
     if (parsed === null) {
@@ -93,38 +85,26 @@ export default function SalaryPage() {
       <div
         className="rounded-2xl border p-5"
         style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+        onBlur={(e) => {
+          // sørger for at timelønn formatteres når input mister fokus
+          if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+          commitHourly();
+        }}
       >
         <h1 className="mb-4 text-center text-2xl font-extrabold">Lønnsutregning</h1>
 
-        {/* Toppsatser (første er redigerbar, de to andre er ren visning – alle med 2 desimaler) */}
-        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-          <div className="rounded-lg px-3 py-2 ui-panel">
-            <div className="text-xs" style={{ color: 'var(--muted)' }}>Du har</div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-sm font-bold">kr</span>
-              <MoneyBox editable value={hourlyStr} onChange={setHourlyStr} />
-              <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
-            </div>
-          </div>
+        {/* === TOPPSEKSJON (nå en egen komponent) === */}
+        <TopBar
+          hourlyStr={hourlyStr}
+          setHourlyStr={setHourlyStr}
+          onCommitHourly={commitHourly}
+          ot50Text={NOK(ot50Rate)}
+          ot100Text={NOK(ot100Rate)}
+        />
 
-          <div className="rounded-lg px-3 py-2 ui-panel">
-            <div className="text-xs" style={{ color: 'var(--muted)' }}>Ved 50% overtid har du</div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-sm font-bold">kr</span>
-              <MoneyBox value={NOK(ot50Rate)} />
-              <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
-            </div>
-          </div>
-
-          <div className="rounded-lg px-3 py-2 ui-panel">
-            <div className="text-xs" style={{ color: 'var(--muted)' }}>Ved 100% overtid har du</div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-sm font-bold">kr</span>
-              <MoneyBox value={NOK(ot100Rate)} />
-              <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
-            </div>
-          </div>
-        </div>
+        {/* === resten av din eksisterende side forblir som før === */}
+        {/* Skift, Timer, Brutto, Skatt, Utbetalt, etc. */}
+        {/* ... alt nedenfor kan stå uendret ... */}
 
         {/* Skift */}
         <div className="mb-2">
@@ -254,42 +234,7 @@ export default function SalaryPage() {
   );
 }
 
-/* ====== Gjenbrukskomponenter ====== */
-
-/** En boks som kan være input (editable) eller ren visning — deler samme look via .ui-chip */
-function MoneyBox({
-  value,
-  onChange,
-  editable = false,
-  width = 90,
-}: {
-  value: string;
-  onChange?: (v: string) => void;
-  editable?: boolean;
-  width?: number;
-}) {
-  if (editable) {
-    return (
-      <input
-        inputMode="decimal"
-        className="ui-chip"
-        style={{ width }}
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
-        onBlur={() => {/* blur håndteres i forelder (commitHourly) */}}
-      />
-    );
-  }
-  return (
-    <div
-      aria-readonly="true"
-      className="ui-chip select-none cursor-default"
-      style={{ width }}
-    >
-      {value}
-    </div>
-  );
-}
+/* ====== Små komponenter fra din eksisterende fil (lot dem være) ====== */
 
 function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
@@ -318,7 +263,7 @@ function MiniLine({
   return (
     <div>
       <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
-      <div className="mt-1 flex items-center justify-between gap-2 rounded-lg px-3 py-2 ui-panel">
+      <div className="mt-1 flex items-center justify-between gap-2 ui-panel rounded-lg px-3 py-2">
         <div className="flex items-center gap-2">
           {left ? <span className="text-sm font-bold">{left}</span> : null}
           {input}
