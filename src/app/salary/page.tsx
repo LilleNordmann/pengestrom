@@ -1,7 +1,7 @@
 // src/app/salary/page.tsx
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import TopBar from '@/components/salary/TopBar';
 import ShiftConfig, { ShiftMode } from '@/components/salary/ShiftConfig';
@@ -9,7 +9,7 @@ import HoursInput from '@/components/salary/HoursInput';
 import BruttoTable from '@/components/salary/BruttoTable';
 import TabelltrekkPanel from '@/components/salary/TabelltrekkPanel';
 import OvertidSkattPanel from '@/components/salary/OvertidSkattPanel';
-import { BarRow } from '@/components/salary/ui';
+import { BarRow, MiniLine, SmallNum } from '@/components/salary/ui';
 
 export default function SalaryPage() {
   const [hourly, setHourly] = useState<number>(250);
@@ -31,6 +31,10 @@ export default function SalaryPage() {
 
   const [tabelltrekkKr, setTabelltrekkKr] = useState<number>(8060);
   const [overtidSkattProsent, setOvertidSkattProsent] = useState<number>(35);
+
+  // NYTT: manuelle justeringer
+  const [matTrekkKr, setMatTrekkKr] = useState<number>(0);
+  const [utleggKr, setUtleggKr] = useState<number>(0);
 
   const ot50Rate = useMemo(() => hourly * 1.5, [hourly]);
   const ot100Rate = useMemo(() => hourly * 2, [hourly]);
@@ -57,7 +61,8 @@ export default function SalaryPage() {
   const skattOvertid = bruttoOvertid * (overtidSkattProsent / 100);
   const totalSkatt = tabelltrekkKr + skattOvertid;
 
-  const utbetalt = brutto - totalSkatt;
+  // OPPDATERT: utbetalt tar hensyn til matTrekk/utlegg
+  const utbetalt = brutto - totalSkatt - matTrekkKr + utleggKr;
 
   const NOK = (n: number) => formatNOK(n);
 
@@ -145,8 +150,8 @@ export default function SalaryPage() {
           bruttoTilTabell={bruttoTilTabell}
           tabelltrekkKr={tabelltrekkKr}
           setTabelltrekkKr={setTabelltrekkKr}
-          initialMode="percent"      // valgfritt
-  initialPercent={30}        // valgfritt
+          initialMode="percent"
+          initialPercent={30}
         />
 
         <OvertidSkattPanel
@@ -157,8 +162,40 @@ export default function SalaryPage() {
           skattOvertid={skattOvertid}
         />
 
-        {/* Totalt skattetrekk + utbetalt */}
+        {/* Totalt skattetrekk */}
         <BarRow label="Totalt Skattetrekk" value={`kr ${NOK(totalSkatt)}`} />
+
+        {/* NYTT: Mat trekk og Utlegg-linjer (redigerbare) */}
+        <div className="mt-2 space-y-2">
+          <MiniLine
+            label="Mat trekk"
+            left="kr"
+            input={
+              <SmallNum
+                value={matTrekkKr}
+                onChange={setMatTrekkKr}
+                step={50}
+                w={100}
+                decimals={2}
+              />
+            }
+          />
+          <MiniLine
+            label="Utlegg"
+            left="kr"
+            input={
+              <SmallNum
+                value={utleggKr}
+                onChange={setUtleggKr}
+                step={50}
+                w={100}
+                decimals={2}
+              />
+            }
+          />
+        </div>
+
+        {/* Utbetalt (etter matTrekk/utlegg) */}
         <BarRow label="Utbetalt" value={`kr ${NOK(utbetalt)}`} tone="neutral" />
 
         {/* Neste */}
