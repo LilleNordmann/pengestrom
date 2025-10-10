@@ -17,7 +17,7 @@ export default function SalaryPage() {
     n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const [hourlyStr, setHourlyStr] = useState<string>(formatNOK(hourly));
 
-  const [shiftYes, setShiftYes] = useState<boolean>(true);
+  const [shiftYes, setShiftYes] = useState<boolean>(false);
   const [shiftMode, setShiftMode] = useState<ShiftMode>('kr');
   const [kveldTillegg, setKveldTillegg] = useState<number>(20);
   const [nattTillegg, setNattTillegg] = useState<number>(50);
