@@ -31,7 +31,7 @@ export default function TopBar({
             value={hourlyStr}
             onChange={setHourlyStr}
           />
-          <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
+          <span className="text-xs" style={{ color: 'var(--muted)' }}></span>
         </div>
       </div>
 
@@ -41,7 +41,7 @@ export default function TopBar({
         <div className="mt-1 flex items-center gap-2">
           <span className="text-sm font-bold">kr</span>
           <MoneyBox value={ot50Text} />
-          <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
+          <span className="text-xs" style={{ color: 'var(--muted)' }}></span>
         </div>
       </div>
 
@@ -51,7 +51,7 @@ export default function TopBar({
         <div className="mt-1 flex items-center gap-2">
           <span className="text-sm font-bold">kr</span>
           <MoneyBox value={ot100Text} />
-          <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
+          <span className="text-xs" style={{ color: 'var(--muted)' }}></span>
         </div>
       </div>
     </div>
