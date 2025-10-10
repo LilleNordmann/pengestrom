@@ -1,7 +1,7 @@
 // src/app/salary/page.tsx
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import TopBar from '@/components/salary/TopBar';
 import ShiftConfig, { ShiftMode } from '@/components/salary/ShiftConfig';
@@ -77,6 +77,10 @@ export default function SalaryPage() {
     setHourlyStr(formatNOK(parsed));
   };
 
+  // Kr-preview for prosent-modus (per time)
+  const kveldPreviewText = `kr ${NOK(hourly * (kveldTillegg / 100))}`;
+  const nattPreviewText  = `kr ${NOK(hourly * (nattTillegg / 100))}`;
+
   return (
     <main className="mx-auto max-w-[680px] p-4">
       <div
@@ -108,16 +112,19 @@ export default function SalaryPage() {
           setKveldTillegg={setKveldTillegg}
           nattTillegg={nattTillegg}
           setNattTillegg={setNattTillegg}
+          kveldPreviewText={kveldPreviewText}
+          nattPreviewText={nattPreviewText}
         />
 
         {/* Timer */}
         <HoursInput
+          shiftYes={shiftYes}
           hVanlig={hVanlig} setHVanlig={setHVanlig}
           hHellig={hHellig} setHHellig={setHHellig}
-          hKveld={hKveld} setHKveld={setHKveld}
-          hNatt={hNatt} setHNatt={setHNatt}
-          hOT50={hOT50} setHOT50={setHOT50}
-          hOT100={hOT100} setHOT100={setHOT100}
+          hKveld={hKveld}   setHKveld={setHKveld}
+          hNatt={hNatt}     setHNatt={setHNatt}
+          hOT50={hOT50}     setHOT50={setHOT50}
+          hOT100={hOT100}   setHOT100={setHOT100}
         />
 
         {/* Brutto-lønn + total bruttolønn */}

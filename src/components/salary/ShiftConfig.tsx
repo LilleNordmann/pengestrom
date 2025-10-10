@@ -28,6 +28,14 @@ export default function ShiftConfig({
   kveldPreviewText?: string;
   nattPreviewText?: string;
 }) {
+  const handleNo = () => {
+    setShiftYes(false);
+    setKveldTillegg(0);
+    setNattTillegg(0);
+    // valgfritt: gå tilbake til 'kr' for å unngå misvisende %-preview neste gang
+    setShiftMode('kr');
+  };
+
   return (
     <div className="mb-2">
       <div className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>
@@ -35,7 +43,7 @@ export default function ShiftConfig({
       </div>
       <div className="mt-1 flex flex-wrap gap-2">
         <Chip label="JA" active={shiftYes} onClick={() => setShiftYes(true)} />
-        <Chip label="NEI" active={!shiftYes} onClick={() => setShiftYes(false)} />
+        <Chip label="NEI" active={!shiftYes} onClick={handleNo} />
       </div>
 
       {/* Skjul hele seksjonen når NEI er valgt */}
