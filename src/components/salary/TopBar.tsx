@@ -23,7 +23,7 @@ export default function TopBar({
     <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
       {/* Du har ... i timelønn (redigerbar) */}
       <div className="rounded-lg px-3 py-2 ui-panel">
-        <div className="text-xs" style={{ color: 'var(--muted)' }}>Du har</div>
+        <div className="text-xs" style={{ color: 'var(--muted)' }}>Timelønn</div>
         <div className="mt-1 flex items-center gap-2">
           <span className="text-sm font-bold">kr</span>
           <MoneyBox
