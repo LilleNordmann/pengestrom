@@ -8,19 +8,18 @@ export default function AppHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-black">
       <div className="mx-auto max-w-6xl px-4">
-        <nav className="h-14 flex items-center justify-between">
+        <nav className="h-16 flex items-center justify-between">
           {/* Venstre: Logo + tittel */}
           <Link href="/dashboard" className="flex items-center gap-3 shrink-0" aria-label="Gå til dashboard">
-            {/* Bruk monokrom (hvit) logo for mørk bakgrunn */}
             <Image
               src="/icons/pengestrom-monokrom.svg"
               alt="Pengestrøm"
-              width={28}
-              height={28}
+              width={44}          // intrinsic (for Next/Image)
+              height={44}
               priority
-              className="h-7 w-auto"
+              className="h-10 w-auto md:h-11"   // faktisk visningsstørrelse
             />
-            <span className="text-xl md:text-2xl font-semibold leading-none text-white">
+            <span className="text-2xl md:text-[28px] font-semibold leading-none text-white">
               Pengestrøm
             </span>
           </Link>
