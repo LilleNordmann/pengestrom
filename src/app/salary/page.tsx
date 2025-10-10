@@ -409,7 +409,7 @@ function KVRow({ k, v }: { k: string; v: string }) {
       style={{ borderBottom: '1px solid var(--border)' }}
     >
       <div className="text-xs" style={{ color: 'var(--muted)' }}>{k}</div>
-      <div className="mx-3 w-6 text-right text-xs" style={{ color: 'var(--muted)' }}>kr</div>
+      <div className="mx-3 w-6 text-right text-xs font-semibold">kr</div>
       <div className="tabular-nums text-sm">{v}</div>
     </div>
   );
