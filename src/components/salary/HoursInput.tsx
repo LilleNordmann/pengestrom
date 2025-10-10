@@ -28,12 +28,24 @@ export default function HoursInput({
       </div>
 
       <div className="mb-4 grid gap-2">
-        <TimeRow label="Vanlige timer jobbet"><SmallNum value={hVanlig} onChange={setHVanlig} step={0.25} /></TimeRow>
-        <TimeRow label="Helligdag"><SmallNum value={hHellig} onChange={setHHellig} step={0.25} /></TimeRow>
-        <TimeRow label="Kveld"><SmallNum value={hKveld} onChange={setHKveld} step={0.25} /></TimeRow>
-        <TimeRow label="Natt"><SmallNum value={hNatt} onChange={setHNatt} step={0.25} /></TimeRow>
-        <TimeRow label="50% overtid"><SmallNum value={hOT50} onChange={setHOT50} step={0.25} /></TimeRow>
-        <TimeRow label="100% overtid"><SmallNum value={hOT100} onChange={setHOT100} step={0.25} /></TimeRow>
+        <TimeRow label="Vanlige timer jobbet">
+          <SmallNum value={hVanlig} onChange={setHVanlig} step={0.25} decimals={2} />
+        </TimeRow>
+        <TimeRow label="Helligdag">
+          <SmallNum value={hHellig} onChange={setHHellig} step={0.25} decimals={2} />
+        </TimeRow>
+        <TimeRow label="Kveld">
+          <SmallNum value={hKveld} onChange={setHKveld} step={0.25} decimals={2} />
+        </TimeRow>
+        <TimeRow label="Natt">
+          <SmallNum value={hNatt} onChange={setHNatt} step={0.25} decimals={2} />
+        </TimeRow>
+        <TimeRow label="50% overtid">
+          <SmallNum value={hOT50} onChange={setHOT50} step={0.25} decimals={2} />
+        </TimeRow>
+        <TimeRow label="100% overtid">
+          <SmallNum value={hOT100} onChange={setHOT100} step={0.25} decimals={2} />
+        </TimeRow>
       </div>
     </>
   );

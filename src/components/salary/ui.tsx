@@ -15,28 +15,55 @@ export function Chip({ label, active, onClick }: { label: string; active: boolea
   );
 }
 
+type SmallNumProps = {
+  value: number;
+  onChange: (v: number) => void;
+  step?: number;
+  min?: number;
+  w?: number;
+  /** NY: antall desimaler å vise/normalisere til (f.eks. 2 for timer) */
+  decimals?: number;
+};
+
 export function SmallNum({
   value,
   onChange,
   step = 1,
   min = 0,
   w = 80,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-  step?: number;
-  min?: number;
-  w?: number;
-}) {
+  decimals,
+}: SmallNumProps) {
+  const display =
+    Number.isFinite(value)
+      ? (decimals != null ? value.toFixed(decimals) : String(value))
+      : (decimals != null ? (0).toFixed(decimals) : '0');
+
   return (
     <input
       type="number"
+      inputMode="decimal"
       className="ui-chip"
       style={{ width: w }}
-      value={Number.isFinite(value) ? value : 0}
+      value={display}
       step={step}
       min={min}
-      onChange={(e) => onChange(parseFloat(e.target.value || '0'))}
+      onChange={(e) => {
+        // tillat både komma og punktum
+        const raw = (e.target.value ?? '').replace(',', '.');
+        if (raw === '') {
+          onChange(0);
+          return;
+        }
+        const n = parseFloat(raw);
+        if (!isNaN(n)) onChange(n);
+      }}
+      onBlur={(e) => {
+        if (decimals != null) {
+          const raw = (e.currentTarget.value ?? '').replace(',', '.');
+          const n = parseFloat(raw);
+          if (!isNaN(n)) onChange(Number(n.toFixed(decimals)));
+        }
+      }}
     />
   );
 }
