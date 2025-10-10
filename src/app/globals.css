@@ -3,8 +3,40 @@
 
 /* === Design tokens === */
 :root {
-  --background: #000000;  /* helsvart */
-  --foreground: #ffffff;  /* hvit tekst */
+  --bg: #ffffff;
+  --fg: #111111;
+  --muted: #666666;
+  --border: #e7e7ea;
+  --card: #ffffff;
+
+  /* paneler */
+  --panel-accent: #f0e6ea;      /* topp + totalsummer */
+  --accent-border: #d9c2cb;
+
+  --panel-warn: #f3ede6;        /* skattekort-bokser */
+  --warn-border: #e2d2c2;
+
+  /* input */
+  --input-soft: #dbeafe;        /* lys blå */
+  --input-ring: #bfdcff;
+}
+
+/* === Dark mode overrides === */
+.dark {
+  --bg: #0c0d0f;
+  --fg: #f5f6f7;
+  --muted: #a1a1aa;
+  --border: #272a30;
+  --card: #101215;
+
+  --panel-accent: #2b2024;      /* diskret burgunder */
+  --accent-border: #3a2a31;
+
+  --panel-warn: #1f1a15;        /* diskret brun */
+  --warn-border: #2e261d;
+
+  --input-soft: #1d2732;        /* dempet blågrå for inputs i dark */
+  --input-ring: #2b3b4b;
 }
 
 /* Tailwind v4 @theme-variabler (beholder font-variablene dine) */
@@ -21,7 +53,7 @@
   html, body { min-height: 100%; }
 
   body {
-    background: var(--background);
+     background: var(--bg); color: var(--fg);
     color: var(--foreground);
      font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
 }
