@@ -14,7 +14,6 @@ export default function ShiftConfig({
   setKveldTillegg,
   nattTillegg,
   setNattTillegg,
-  // nye props for prosent-modus preview i kroner
   kveldPreviewText,
   nattPreviewText,
 }: {
@@ -26,7 +25,6 @@ export default function ShiftConfig({
   setKveldTillegg: (v: number) => void;
   nattTillegg: number;
   setNattTillegg: (v: number) => void;
-  // f.eks. "kr 375,00" – ferdig formatert
   kveldPreviewText?: string;
   nattPreviewText?: string;
 }) {
@@ -40,34 +38,36 @@ export default function ShiftConfig({
         <Chip label="NEI" active={!shiftYes} onClick={() => setShiftYes(false)} />
       </div>
 
-      <div className="mt-2 text-xs font-semibold" style={{ color: 'var(--muted)' }}>
-        Skifttillegg i
-      </div>
-      <div className="mt-1 flex flex-wrap gap-2">
-        <Chip label="Prosent" active={shiftMode === '%'} onClick={() => setShiftMode('%')} />
-        <Chip label="Kroner" active={shiftMode === 'kr'} onClick={() => setShiftMode('kr')} />
-      </div>
-
+      {/* Skjul hele seksjonen når NEI er valgt */}
       {shiftYes && (
-        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Row
-            label="Kveldstillegg"
-            unit={shiftMode === 'kr' ? 'kr' : '%'}
-            value={kveldTillegg}
-            onChange={setKveldTillegg}
-            step={shiftMode === 'kr' ? 1 : 0.5}
-            // vis kun preview i prosent-modus
-            rightText={shiftMode === '%' ? (kveldPreviewText ?? '') : ''}
-          />
-          <Row
-            label="Natt­tillegg"
-            unit={shiftMode === 'kr' ? 'kr' : '%'}
-            value={nattTillegg}
-            onChange={setNattTillegg}
-            step={shiftMode === 'kr' ? 1 : 0.5}
-            rightText={shiftMode === '%' ? (nattPreviewText ?? '') : ''}
-          />
-        </div>
+        <>
+          <div className="mt-2 text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+            Skifttillegg i
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <Chip label="Prosent" active={shiftMode === '%'} onClick={() => setShiftMode('%')} />
+            <Chip label="Kroner" active={shiftMode === 'kr'} onClick={() => setShiftMode('kr')} />
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Row
+              label="Kveldstillegg"
+              unit={shiftMode === 'kr' ? 'kr' : '%'}
+              value={kveldTillegg}
+              onChange={setKveldTillegg}
+              step={shiftMode === 'kr' ? 1 : 0.5}
+              rightText={shiftMode === '%' ? (kveldPreviewText ?? '') : ''}
+            />
+            <Row
+              label="Natt­tillegg"
+              unit={shiftMode === 'kr' ? 'kr' : '%'}
+              value={nattTillegg}
+              onChange={setNattTillegg}
+              step={shiftMode === 'kr' ? 1 : 0.5}
+              rightText={shiftMode === '%' ? (nattPreviewText ?? '') : ''}
+            />
+          </div>
+        </>
       )}
     </div>
   );
@@ -92,25 +92,20 @@ function Row({
     <div
       className="
         grid items-center gap-x-3 gap-y-2
-        /* På mobil bryter preview under feltet. På md+ ligger alt på én linje */
-        grid-cols-[1fr_auto_minmax(72px,96px)] 
+        grid-cols-[1fr_auto_minmax(72px,96px)]
         md:grid-cols-[auto_auto_minmax(84px,112px)_1fr]
       "
     >
-      {/* Label */}
       <div className="text-sm md:text-[15px]">{label}</div>
 
-      {/* Enhet (kr / %) */}
       <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>
         {unit}
       </div>
 
-      {/* Input */}
       <div className="justify-self-start md:justify-self-auto w-[84px]">
         <SmallNum value={value} onChange={onChange} step={step ?? 1} />
       </div>
 
-      {/* Høyreside (kr-preview) – skjules i kroner-modus */}
       {rightText ? (
         <div
           className="
@@ -122,7 +117,6 @@ function Row({
           {rightText}
         </div>
       ) : (
-        // tomt element for å holde linjehøyde konsistent på md+
         <div className="hidden md:block" />
       )}
     </div>
