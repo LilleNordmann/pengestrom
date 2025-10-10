@@ -20,40 +20,54 @@ export default function TopBar({
   ot100Text,
 }: Props) {
   return (
-    <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-      {/* Du har ... i timelønn (redigerbar) */}
-      <div className="rounded-lg px-3 py-2 ui-panel">
-        <div className="text-xs" style={{ color: 'var(--muted)' }}>Timelønn</div>
-        <div className="mt-1 flex items-center gap-2">
-          <span className="text-sm font-bold">kr</span>
+    <div className="mb-4 rounded-lg px-4 py-3 ui-panel">
+      {/* Fleksibel, bryter pent på små skjermer */}
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+        {/* Timelønn (redigerbar) */}
+        <InlineBlock label="Timelønn">
+          <span className="mx-2 text-sm font-bold">kr</span>
           <MoneyBox
             editable
             value={hourlyStr}
             onChange={setHourlyStr}
+            // commit ved Enter/blur så verdien formatteres
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === 'Enter') onCommitHourly();
+            }}
+            onBlur={onCommitHourly as any}
           />
-          <span className="text-xs" style={{ color: 'var(--muted)' }}></span>
-        </div>
-      </div>
+        </InlineBlock>
 
-      {/* 50% overtid (visning) */}
-      <div className="rounded-lg px-3 py-2 ui-panel">
-        <div className="text-xs" style={{ color: 'var(--muted)' }}>Ved 50% overtid har du</div>
-        <div className="mt-1 flex items-center gap-2">
-          <span className="text-sm font-bold">kr</span>
-          <MoneyBox value={ot50Text} />
-          <span className="text-xs" style={{ color: 'var(--muted)' }}></span>
-        </div>
-      </div>
+        {/* 50% overtid (visning) */}
+        <InlineBlock label="50% overtid">
+          <span className="mx-2 text-sm font-bold">kr</span>
+          <span className="tabular-nums text-lg font-extrabold">{ot50Text}</span>
+        </InlineBlock>
 
-      {/* 100% overtid (visning) */}
-      <div className="rounded-lg px-3 py-2 ui-panel">
-        <div className="text-xs" style={{ color: 'var(--muted)' }}>Ved 100% overtid har du</div>
-        <div className="mt-1 flex items-center gap-2">
-          <span className="text-sm font-bold">kr</span>
-          <MoneyBox value={ot100Text} />
-          <span className="text-xs" style={{ color: 'var(--muted)' }}></span>
-        </div>
+        {/* 100% overtid (visning) */}
+        <InlineBlock label="100% overtid">
+          <span className="mx-2 text-sm font-bold">kr</span>
+          <span className="tabular-nums text-lg font-extrabold">{ot100Text}</span>
+        </InlineBlock>
       </div>
+    </div>
+  );
+}
+
+/** Liten hjelpekomponent for "Label  kr  Value" på én linje */
+function InlineBlock({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center">
+      <span className="mr-2 text-xs" style={{ color: 'var(--muted)' }}>
+        {label}
+      </span>
+      {children}
     </div>
   );
 }
