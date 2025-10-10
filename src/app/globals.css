@@ -2,42 +2,34 @@
 @import "tailwindcss";
 
 /* === Design tokens === */
+/* ==== App design tokens (dark-only) ==== */
 :root {
-  --bg: #ffffff;
-  --fg: #111111;
-  --muted: #666666;
-  --border: #e7e7ea;
-  --card: #ffffff;
+  --bg: #0b0b0c;          /* sidebakgrunn (svart) */
+  --fg: #f5f6f7;          /* standard tekst (lys) */
+  --muted: #b4b7bd;       /* sekundær tekst */
+  --border: #2a2d33;      /* rammer/linjer */
+  --card: #101215;        /* kort/bokser */
 
   /* paneler */
-  --panel-accent: #f0e6ea;      /* topp + totalsummer */
-  --accent-border: #d9c2cb;
+  --panel-accent: #1a1417;   /* topp + totalfelter */
+  --accent-border: #2a2024;
 
-  --panel-warn: #f3ede6;        /* skattekort-bokser */
-  --warn-border: #e2d2c2;
+  --panel-warn: #17130e;     /* skattekort-bokser */
+  --warn-border: #2a2218;
 
-  /* input */
-  --input-soft: #dbeafe;        /* lys blå */
-  --input-ring: #bfdcff;
+  /* inputfelter */
+  --input-soft: #1e2630;     /* bakgrunn input */
+  --input-ring: #2f3b46;     /* kant/ring input */
+  --input-fg: #eaf0f6;       /* tekst i input */
 }
 
-/* === Dark mode overrides === */
-.dark {
-  --bg: #0c0d0f;
-  --fg: #f5f6f7;
-  --muted: #a1a1aa;
-  --border: #272a30;
-  --card: #101215;
-
-  --panel-accent: #2b2024;      /* diskret burgunder */
-  --accent-border: #3a2a31;
-
-  --panel-warn: #1f1a15;        /* diskret brun */
-  --warn-border: #2e261d;
-
-  --input-soft: #1d2732;        /* dempet blågrå for inputs i dark */
-  --input-ring: #2b3b4b;
+/* ==== Base ==== */
+@layer base {
+  html, body { background: var(--bg); color: var(--fg); }
+  a { color: var(--fg); text-decoration: none; }
+  a:hover { opacity: .9; }
 }
+
 
 /* Tailwind v4 @theme-variabler (beholder font-variablene dine) */
 @theme inline {

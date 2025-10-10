@@ -70,14 +70,14 @@ export default function SalaryPage() {
     <div className="flex items-center gap-2">
       <input
         type="number"
-        className="w-28 rounded-lg px-2 py-1 text-right font-medium outline-none ring-1 focus:ring-2"
-        style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
+        className="w-28 rounded-lg px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
+        style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)', color: 'var(--input-fg)' }}
         value={Number.isFinite(value) ? value : 0}
         step={step}
         min={min}
         onChange={(e) => onChange(parseFloat(e.target.value || '0'))}
       />
-      {suffix ? <span className="text-sm text-muted-foreground">{suffix}</span> : null}
+      {suffix ? <span className="text-sm" style={{ color: 'var(--muted)' }}>{suffix}</span> : null}
     </div>
   );
 
@@ -85,8 +85,11 @@ export default function SalaryPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
-      <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <h1 className="mb-6 text-center text-3xl font-bold">Lønnsutregning</h1>
+      <div
+        className="rounded-2xl border p-6 shadow-sm"
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <h1 className="mb-6 text-center text-3xl font-extrabold">Lønnsutregning</h1>
 
         {/* Øvre satser-panel */}
         <section
@@ -113,10 +116,10 @@ export default function SalaryPage() {
         <section className="mb-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <div className="text-sm font-semibold text-neutral-500">Jobber du skift</div>
-              <div className="text-sm text-neutral-800 dark:text-neutral-200">JA/NEI</div>
-              <div className="mt-2 text-sm font-semibold text-neutral-500">Skifttillegg i</div>
-              <div className="text-sm text-neutral-800 dark:text-neutral-200">Prosent/kroner</div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>Jobber du skift</div>
+              <div className="text-sm">JA/NEI</div>
+              <div className="mt-2 text-sm font-semibold" style={{ color: 'var(--muted)' }}>Skifttillegg i</div>
+              <div className="text-sm">Prosent/kroner</div>
             </div>
 
             <div className="grid max-w-sm grid-cols-2 gap-4">
@@ -124,34 +127,27 @@ export default function SalaryPage() {
                 className="flex items-center justify-between rounded-lg px-3 py-2 ring-1"
                 style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
               >
-                <span
-                  className="shrink-0 w-6 rounded-md px-2 py-1 text-center text-sm font-semibold ring-1"
-                  style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-                >
-                  kr
-                </span>
+                <BadgeKR />
                 <Num value={kveldTillegg} onChange={setKveldTillegg} step={1} min={0} />
-                <span className="ml-2 text-sm">i tillegg</span>
+                <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>i tillegg</span>
               </div>
               <div
                 className="flex items-center justify-between rounded-lg px-3 py-2 ring-1"
                 style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
               >
-                <span
-                  className="shrink-0 w-6 rounded-md px-2 py-1 text-center text-sm font-semibold ring-1"
-                  style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-                >
-                  kr
-                </span>
+                <BadgeKR />
                 <Num value={nattTillegg} onChange={setNattTillegg} step={1} min={0} />
-                <span className="ml-2 text-sm">i tillegg</span>
+                <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>i tillegg</span>
               </div>
             </div>
           </div>
         </section>
 
         {/* Skriv inn timene */}
-        <section className="mb-6 rounded-xl border border-neutral-300 p-4 text-center dark:border-neutral-700">
+        <section
+          className="mb-6 rounded-xl p-4 text-center"
+          style={{ border: '1px solid var(--border)' }}
+        >
           <h2 className="text-xl font-semibold">Skriv inn timene du har jobbet</h2>
         </section>
 
@@ -181,43 +177,28 @@ export default function SalaryPage() {
           <div className="grid gap-3">
             <InputRow label="Timelønn">
               <div className="flex items-center gap-2">
-                <span
-                  className="rounded-md px-2 py-1 text-sm font-semibold ring-1"
-                  style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-                >
-                  kr
-                </span>
+                <BadgeKR />
                 <Num value={hourly} onChange={setHourly} step={1} min={0} />
               </div>
             </InputRow>
             <InputRow label="50% overtidssats">
               <div className="flex items-center gap-2">
-                <span
-                  className="rounded-md px-2 py-1 text-sm font-semibold ring-1"
-                  style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-                >
-                  kr
-                </span>
+                <BadgeKR />
                 <input
                   disabled
-                  className="w-28 rounded-lg px-2 py-1 text-right"
-                  style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)' }}
+                  className="w-28 rounded-lg px-2 py-1 text-right font-semibold"
+                  style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
                   value={NOK(ot50Rate)}
                 />
               </div>
             </InputRow>
             <InputRow label="100% overtidssats">
               <div className="flex items-center gap-2">
-                <span
-                  className="rounded-md px-2 py-1 text-sm font-semibold ring-1"
-                  style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-                >
-                  kr
-                </span>
+                <BadgeKR />
                 <input
                   disabled
-                  className="w-28 rounded-lg px-2 py-1 text-right"
-                  style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)' }}
+                  className="w-28 rounded-lg px-2 py-1 text-right font-semibold"
+                  style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
                   value={NOK(ot100Rate)}
                 />
               </div>
@@ -228,7 +209,10 @@ export default function SalaryPage() {
         {/* Brutto lønn tabell */}
         <section className="mb-6">
           <h3 className="mb-2 text-xl font-semibold">Brutto Lønn</h3>
-          <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
+          <div
+            className="overflow-hidden rounded-xl"
+            style={{ border: '1px solid var(--border)' }}
+          >
             <TableRow title="Timelønn" value={NOK(timelonn)} />
             <TableRow title="Kveld" value={NOK(kveld)} />
             <TableRow title="Natt" value={NOK(natt)} />
@@ -259,7 +243,7 @@ export default function SalaryPage() {
             </div>
             <div className="mt-2 flex items-center justify-between gap-3">
               <label className="flex items-center gap-2">
-                <span className="text-sm text-neutral-600 dark:text-neutral-300">Skatt Tabelltrekk</span>
+                <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt Tabelltrekk</span>
                 <Num value={tabelltrekkKr} onChange={setTabelltrekkKr} step={100} min={0} />
               </label>
               <div className="tabular-nums">kr {NOK(tabelltrekkKr)}</div>
@@ -276,10 +260,10 @@ export default function SalaryPage() {
             </div>
             <div className="mt-2 flex items-center justify-between gap-3">
               <label className="flex items-center gap-2">
-                <span className="text-sm text-neutral-600 dark:text-neutral-300">Skatt prosenttrekk</span>
+                <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt prosenttrekk</span>
                 <div className="flex items-center gap-2">
                   <Num value={overtidSkattProsent} onChange={setOvertidSkattProsent} step={1} min={0} />
-                  <span className="text-sm">%</span>
+                  <span className="text-sm" style={{ color: 'var(--muted)' }}>%</span>
                 </div>
               </label>
               <div className="tabular-nums">kr {NOK(skattOvertid)}</div>
@@ -298,7 +282,10 @@ export default function SalaryPage() {
         </section>
 
         {/* Utbetalt */}
-        <section className="mb-8 rounded-xl p-4 text-xl font-semibold" style={{ background: 'var(--card)' }}>
+        <section
+          className="mb-8 rounded-xl p-4 text-xl font-semibold"
+          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+        >
           <div className="flex items-center justify-between">
             <span className="tracking-wide">Utbetalt</span>
             <span className="tabular-nums">kr {NOK(utbetalt)}</span>
@@ -308,7 +295,7 @@ export default function SalaryPage() {
         <div className="flex justify-center">
           <Link
             href="/"
-            className="w-full rounded-2xl bg-black py-4 text-center text-white transition hover:opacity-90 dark:bg-white dark:text-black md:w-72"
+            className="w-full rounded-2xl bg-white py-4 text-center font-semibold text-black transition hover:opacity-90 md:w-72"
           >
             Neste
           </Link>
@@ -349,19 +336,14 @@ function ValueRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span
-        className="w-6 rounded-md px-2 py-1 text-center text-sm font-semibold ring-1"
-        style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-      >
-        {left}
-      </span>
+      <BadgeKR />
       <input
         disabled
-        className="w-28 rounded-lg px-2 py-1 text-right font-medium"
-        style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)' }}
+        className="w-28 rounded-lg px-2 py-1 text-right font-semibold"
+        style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
         value={right}
       />
-      {trailing ? <span className="ml-2 text-sm text-neutral-600 dark:text-neutral-300">{trailing}</span> : null}
+      {trailing ? <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>{trailing}</span> : null}
     </div>
   );
 }
@@ -374,7 +356,10 @@ function InputRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl border border-neutral-200 px-3 py-2 dark:border-neutral-800">
+    <div
+      className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl px-3 py-2"
+      style={{ border: '1px solid var(--border)' }}
+    >
       <div className="text-sm">{label}</div>
       <div className="flex items-center">{children}</div>
     </div>
@@ -383,10 +368,24 @@ function InputRow({
 
 function TableRow({ title, value }: { title: string; value: string }) {
   return (
-    <div className="grid grid-cols-[1fr_auto_auto] items-center border-b border-neutral-200 px-3 py-2 last:border-0 dark:border-neutral-800">
-      <div className="text-sm">{title}</div>
+    <div
+      className="grid grid-cols-[1fr_auto_auto] items-center px-3 py-2 last:border-0"
+      style={{ borderBottom: '1px solid var(--border)' }}
+    >
+      <div className="text-sm" style={{ color: 'var(--muted)' }}>{title}</div>
       <div className="mx-3 w-6 text-right text-sm font-semibold">kr</div>
       <div className="tabular-nums">{value}</div>
     </div>
+  );
+}
+
+function BadgeKR() {
+  return (
+    <span
+      className="rounded-md px-2 py-1 text-sm font-extrabold ring-1"
+      style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)', color: 'var(--input-fg)' }}
+    >
+      kr
+    </span>
   );
 }
