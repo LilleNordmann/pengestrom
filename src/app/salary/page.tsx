@@ -5,14 +5,19 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
 type Gate = 'ok';
+type ShiftMode = 'kr' | '%';
 
 export default function SalaryPage() {
   const gate: Gate = 'ok';
 
   // --- Inndata: satser ---
   const [hourly, setHourly] = useState<number>(250);
-  const [kveldTillegg, setKveldTillegg] = useState<number>(20);
-  const [nattTillegg, setNattTillegg] = useState<number>(50);
+
+  // Skift
+  const [shiftYes, setShiftYes] = useState<boolean>(true);
+  const [shiftMode, setShiftMode] = useState<ShiftMode>('kr');
+  const [kveldTillegg, setKveldTillegg] = useState<number>(20); // kr eller %
+  const [nattTillegg, setNattTillegg] = useState<number>(50);   // kr eller %
 
   // --- Inndata: timer ---
   const [hVanlig, setHVanlig] = useState<number>(150);
@@ -34,8 +39,19 @@ export default function SalaryPage() {
   const baseHours = hVanlig + hHellig;
   const timelonn = baseHours * hourly;
 
-  const kveld = hKveld * kveldTillegg;
-  const natt = hNatt * nattTillegg;
+  const kveld =
+    shiftYes
+      ? (shiftMode === 'kr'
+          ? hKveld * kveldTillegg
+          : hKveld * hourly * (kveldTillegg / 100))
+      : 0;
+
+  const natt =
+    shiftYes
+      ? (shiftMode === 'kr'
+          ? hNatt * nattTillegg
+          : hNatt * hourly * (nattTillegg / 100))
+      : 0;
 
   const ot50 = hOT50 * ot50Rate;
   const ot100 = hOT100 * ot100Rate;
@@ -60,18 +76,27 @@ export default function SalaryPage() {
     step = 1,
     min = 0,
     suffix,
+    w = 'w-28',
+    centered = false,
   }: {
     value: number;
     onChange: (v: number) => void;
     step?: number;
     min?: number;
     suffix?: string;
+    w?: string;
+    centered?: boolean;
   }) => (
-    <div className="flex items-center gap-2">
+    <div className={`flex items-center gap-2 ${centered ? 'justify-center' : ''}`}>
+      {/* ren "kr"/"%" håndteres uten bakgrunn i kallet */}
       <input
         type="number"
-        className="w-28 rounded-lg px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
-        style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)', color: 'var(--input-fg)' }}
+        className={`${w} rounded-lg px-3 py-2 text-right font-semibold outline-none ring-1 focus:ring-2`}
+        style={{
+          background: 'var(--input-soft)',
+          borderColor: 'var(--input-ring)',
+          color: 'var(--input-fg)',
+        }}
         value={Number.isFinite(value) ? value : 0}
         step={step}
         min={min}
@@ -91,55 +116,106 @@ export default function SalaryPage() {
       >
         <h1 className="mb-6 text-center text-3xl font-extrabold">Lønnsutregning</h1>
 
-        {/* Øvre satser-panel */}
+        {/* Øvre satser-panel: timelønn + autoutregnet 50/100% */}
         <section
           className="mb-6 rounded-xl p-4"
           style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <Row
+            <TopCard
               label="Du har"
-              valueRight={<ValueRow left="kr" right={NOK(hourly)} trailing="i timelønn" />}
+              editable
+              value={hourly}
+              onChange={setHourly}
+              trailing="i timelønn"
+              prefix="kr"
             />
-            <Row
+            <TopCard
               label="Ved 50% overtid har du"
-              valueRight={<ValueRow left="kr" right={NOK(ot50Rate)} trailing="i timelønn" />}
+              value={ot50Rate}
+              trailing="i timelønn"
+              prefix="kr"
             />
-            <Row
+            <TopCard
               label="Ved 100% overtid har du"
-              valueRight={<ValueRow left="kr" right={NOK(ot100Rate)} trailing="i timelønn" />}
+              value={ot100Rate}
+              trailing="i timelønn"
+              prefix="kr"
             />
           </div>
         </section>
 
-        {/* Skifttillegg / kvelds- og natt-tillegg */}
+        {/* Skift-tillegg: JA/NEI + kr/% + felt for kveld/natt */}
         <section className="mb-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>Jobber du skift</div>
-              <div className="text-sm">JA/NEI</div>
-              <div className="mt-2 text-sm font-semibold" style={{ color: 'var(--muted)' }}>Skifttillegg i</div>
-              <div className="text-sm">Prosent/kroner</div>
+            <div className="flex flex-col gap-2">
+              <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>
+                Jobber du skift
+              </div>
+              <div className="flex gap-2">
+                <Toggle
+                  label="JA"
+                  active={shiftYes}
+                  onClick={() => setShiftYes(true)}
+                />
+                <Toggle
+                  label="NEI"
+                  active={!shiftYes}
+                  onClick={() => setShiftYes(false)}
+                />
+              </div>
+
+              {shiftYes && (
+                <>
+                  <div className="mt-3 text-sm font-semibold" style={{ color: 'var(--muted)' }}>
+                    Skifttillegg i
+                  </div>
+                  <div className="flex gap-2">
+                    <Toggle
+                      label="Prosent"
+                      active={shiftMode === '%'}
+                      onClick={() => setShiftMode('%')}
+                    />
+                    <Toggle
+                      label="Kroner"
+                      active={shiftMode === 'kr'}
+                      onClick={() => setShiftMode('kr')}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="grid max-w-sm grid-cols-2 gap-4">
-              <div
-                className="flex items-center justify-between rounded-lg px-3 py-2 ring-1"
-                style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-              >
-                <BadgeKR />
-                <Num value={kveldTillegg} onChange={setKveldTillegg} step={1} min={0} />
-                <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>i tillegg</span>
+            {shiftYes && (
+              <div className="grid max-w-md grid-cols-2 gap-4">
+                <LabeledInput
+                  label="Kveldstillegg"
+                  prefix={shiftMode === 'kr' ? 'kr' : '%'}
+                  input={
+                    <Num
+                      value={kveldTillegg}
+                      onChange={setKveldTillegg}
+                      step={shiftMode === 'kr' ? 1 : 0.5}
+                      min={0}
+                    />
+                  }
+                  suffix={shiftMode === 'kr' ? 'i tillegg' : 'av timelønn'}
+                />
+                <LabeledInput
+                  label="Nattstillegg"
+                  prefix={shiftMode === 'kr' ? 'kr' : '%'}
+                  input={
+                    <Num
+                      value={nattTillegg}
+                      onChange={setNattTillegg}
+                      step={shiftMode === 'kr' ? 1 : 0.5}
+                      min={0}
+                    />
+                  }
+                  suffix={shiftMode === 'kr' ? 'i tillegg' : 'av timelønn'}
+                />
               </div>
-              <div
-                className="flex items-center justify-between rounded-lg px-3 py-2 ring-1"
-                style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
-              >
-                <BadgeKR />
-                <Num value={nattTillegg} onChange={setNattTillegg} step={1} min={0} />
-                <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>i tillegg</span>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
@@ -151,68 +227,32 @@ export default function SalaryPage() {
           <h2 className="text-xl font-semibold">Skriv inn timene du har jobbet</h2>
         </section>
 
-        <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="grid gap-3">
-            <InputRow label="Vanlige timer jobbet">
-              <Num value={hVanlig} onChange={setHVanlig} step={0.25} min={0} suffix="Timer" />
-            </InputRow>
-            <InputRow label="Helligdag">
-              <Num value={hHellig} onChange={setHHellig} step={0.25} min={0} suffix="Timer" />
-            </InputRow>
-            <InputRow label="Kveld">
-              <Num value={hKveld} onChange={setHKveld} step={0.25} min={0} suffix="Timer" />
-            </InputRow>
-            <InputRow label="Natt">
-              <Num value={hNatt} onChange={setHNatt} step={0.25} min={0} suffix="Timer" />
-            </InputRow>
-            <InputRow label="50% overtid">
-              <Num value={hOT50} onChange={setHOT50} step={0.25} min={0} suffix="Timer" />
-            </InputRow>
-            <InputRow label="100% overtid">
-              <Num value={hOT100} onChange={setHOT100} step={0.25} min={0} suffix="Timer" />
-            </InputRow>
-          </div>
-
-          {/* Redigerbar timelønn + visning av 50%/100% */}
-          <div className="grid gap-3">
-            <InputRow label="Timelønn">
-              <div className="flex items-center gap-2">
-                <BadgeKR />
-                <Num value={hourly} onChange={setHourly} step={1} min={0} />
-              </div>
-            </InputRow>
-            <InputRow label="50% overtidssats">
-              <div className="flex items-center gap-2">
-                <BadgeKR />
-                <input
-                  disabled
-                  className="w-28 rounded-lg px-2 py-1 text-right font-semibold"
-                  style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
-                  value={NOK(ot50Rate)}
-                />
-              </div>
-            </InputRow>
-            <InputRow label="100% overtidssats">
-              <div className="flex items-center gap-2">
-                <BadgeKR />
-                <input
-                  disabled
-                  className="w-28 rounded-lg px-2 py-1 text-right font-semibold"
-                  style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
-                  value={NOK(ot100Rate)}
-                />
-              </div>
-            </InputRow>
-          </div>
+        {/* Kun venstre kolonne med timer (høyre kolonne fjernet) */}
+        <section className="mb-8 grid grid-cols-1 gap-3">
+          <InputRow label="Vanlige timer jobbet">
+            <Num value={hVanlig} onChange={setHVanlig} step={0.25} min={0} suffix="Timer" />
+          </InputRow>
+          <InputRow label="Helligdag">
+            <Num value={hHellig} onChange={setHHellig} step={0.25} min={0} suffix="Timer" />
+          </InputRow>
+          <InputRow label="Kveld">
+            <Num value={hKveld} onChange={setHKveld} step={0.25} min={0} suffix="Timer" />
+          </InputRow>
+          <InputRow label="Natt">
+            <Num value={hNatt} onChange={setHNatt} step={0.25} min={0} suffix="Timer" />
+          </InputRow>
+          <InputRow label="50% overtid">
+            <Num value={hOT50} onChange={setHOT50} step={0.25} min={0} suffix="Timer" />
+          </InputRow>
+          <InputRow label="100% overtid">
+            <Num value={hOT100} onChange={setHOT100} step={0.25} min={0} suffix="Timer" />
+          </InputRow>
         </section>
 
         {/* Brutto lønn tabell */}
         <section className="mb-6">
           <h3 className="mb-2 text-xl font-semibold">Brutto Lønn</h3>
-          <div
-            className="overflow-hidden rounded-xl"
-            style={{ border: '1px solid var(--border)' }}
-          >
+          <div className="overflow-hidden rounded-xl" style={{ border: '1px solid var(--border)' }}>
             <TableRow title="Timelønn" value={NOK(timelonn)} />
             <TableRow title="Kveld" value={NOK(kveld)} />
             <TableRow title="Natt" value={NOK(natt)} />
@@ -241,11 +281,15 @@ export default function SalaryPage() {
               <span className="font-medium">Brutto til tabelltrekk</span>
               <span className="tabular-nums">kr {NOK(bruttoTilTabell)}</span>
             </div>
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <label className="flex items-center gap-2">
+            {/* Sentrert input */}
+            <div className="mt-2 flex w-full items-center justify-center">
+              <div className="flex items-center gap-2">
                 <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt Tabelltrekk</span>
-                <Num value={tabelltrekkKr} onChange={setTabelltrekkKr} step={100} min={0} />
-              </label>
+                <Num value={tabelltrekkKr} onChange={setTabelltrekkKr} step={100} min={0} centered w="w-32" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-sm" style={{ color: 'var(--muted)' }}>Sum tabelltrekk</span>
               <div className="tabular-nums">kr {NOK(tabelltrekkKr)}</div>
             </div>
           </div>
@@ -258,14 +302,16 @@ export default function SalaryPage() {
               <span className="font-medium">Brutto Overtid</span>
               <span className="tabular-nums">kr {NOK(bruttoOvertid)}</span>
             </div>
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <label className="flex items-center gap-2">
+            {/* Sentrert input */}
+            <div className="mt-2 flex w-full items-center justify-center">
+              <div className="flex items-center gap-2">
                 <span className="text-sm" style={{ color: 'var(--muted)' }}>Skatt prosenttrekk</span>
-                <div className="flex items-center gap-2">
-                  <Num value={overtidSkattProsent} onChange={setOvertidSkattProsent} step={1} min={0} />
-                  <span className="text-sm" style={{ color: 'var(--muted)' }}>%</span>
-                </div>
-              </label>
+                <Num value={overtidSkattProsent} onChange={setOvertidSkattProsent} step={1} min={0} centered w="w-20" />
+                <span className="text-sm" style={{ color: 'var(--muted)' }}>%</span>
+              </div>
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-sm" style={{ color: 'var(--muted)' }}>Sum prosenttrekk</span>
               <div className="tabular-nums">kr {NOK(skattOvertid)}</div>
             </div>
           </div>
@@ -305,14 +351,22 @@ export default function SalaryPage() {
   );
 }
 
-/* ---- Små hjelpekomponenter ---- */
+/* ---- Hjelpekomponenter ---- */
 
-function Row({
+function TopCard({
   label,
-  valueRight,
+  value,
+  onChange,
+  editable = false,
+  trailing,
+  prefix = 'kr',
 }: {
   label: string;
-  valueRight: React.ReactNode;
+  value: number;
+  onChange?: (v: number) => void;
+  editable?: boolean;
+  trailing?: string;
+  prefix?: 'kr' | '%';
 }) {
   return (
     <div
@@ -320,30 +374,76 @@ function Row({
       style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
     >
       <span className="text-sm">{label}</span>
-      <div className="min-w-[230px]">{valueRight}</div>
+      <div className="flex min-w-[240px] items-center justify-between gap-2">
+        <span className="text-sm font-extrabold">{prefix}</span>
+        {editable ? (
+          <input
+            type="number"
+            className="w-28 rounded-lg px-3 py-2 text-right font-semibold outline-none ring-1 focus:ring-2"
+            style={{
+              background: 'var(--input-soft)',
+              borderColor: 'var(--input-ring)',
+              color: 'var(--input-fg)',
+            }}
+            value={value}
+            step={1}
+            min={0}
+            onChange={(e) => onChange?.(parseFloat(e.target.value || '0'))}
+          />
+        ) : (
+          <input
+            disabled
+            className="w-28 rounded-lg px-3 py-2 text-right font-semibold"
+            style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
+            value={value.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          />
+        )}
+        {trailing ? <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>{trailing}</span> : null}
+      </div>
     </div>
   );
 }
 
-function ValueRow({
-  left,
-  right,
-  trailing,
+function Toggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-3 py-1 text-sm font-semibold transition ${
+        active ? 'opacity-100' : 'opacity-60'
+      }`}
+      style={{
+        background: 'var(--input-soft)',
+        border: `1px solid var(--input-ring)`,
+        color: 'var(--input-fg)',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function LabeledInput({
+  label,
+  prefix,
+  input,
+  suffix,
 }: {
-  left: string;
-  right: string;
-  trailing?: string;
+  label: string;
+  prefix?: string;
+  input: React.ReactNode;
+  suffix?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <BadgeKR />
-      <input
-        disabled
-        className="w-28 rounded-lg px-2 py-1 text-right font-semibold"
-        style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
-        value={right}
-      />
-      {trailing ? <span className="ml-2 text-sm" style={{ color: 'var(--muted)' }}>{trailing}</span> : null}
+    <div
+      className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 ring-1"
+      style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)' }}
+    >
+      <div className="flex items-center gap-2">
+        {prefix ? <span className="text-sm font-extrabold">{prefix}</span> : null}
+        {input}
+      </div>
+      {suffix ? <span className="text-sm" style={{ color: 'var(--muted)' }}>{suffix}</span> : null}
     </div>
   );
 }
@@ -376,16 +476,5 @@ function TableRow({ title, value }: { title: string; value: string }) {
       <div className="mx-3 w-6 text-right text-sm font-semibold">kr</div>
       <div className="tabular-nums">{value}</div>
     </div>
-  );
-}
-
-function BadgeKR() {
-  return (
-    <span
-      className="rounded-md px-2 py-1 text-sm font-extrabold ring-1"
-      style={{ background: 'var(--input-soft)', borderColor: 'var(--input-ring)', color: 'var(--input-fg)' }}
-    >
-      kr
-    </span>
   );
 }
