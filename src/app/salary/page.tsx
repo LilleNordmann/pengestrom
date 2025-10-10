@@ -9,7 +9,7 @@ import HoursInput from '@/components/salary/HoursInput';
 import BruttoTable from '@/components/salary/BruttoTable';
 import TabelltrekkPanel from '@/components/salary/TabelltrekkPanel';
 import OvertidSkattPanel from '@/components/salary/OvertidSkattPanel';
-import { BarRow, MiniLine, SmallNum } from '@/components/salary/ui';
+import { BarRow, EditRow, SmallNum } from '@/components/salary/ui';
 
 export default function SalaryPage() {
   const [hourly, setHourly] = useState<number>(250);
@@ -162,41 +162,33 @@ export default function SalaryPage() {
           skattOvertid={skattOvertid}
         />
 
-        {/* Totalt skattetrekk */}
-        <BarRow label="Totalt Skattetrekk" value={`kr ${NOK(totalSkatt)}`} />
+       {/* Totalt skattetrekk */}
+<BarRow label="Totalt Skattetrekk" value={`kr ${NOK(totalSkatt)}`} />
 
-        {/* NYTT: Mat trekk og Utlegg-linjer (redigerbare) */}
-        <div className="mt-2 space-y-2">
-          <MiniLine
-            label="Mat trekk"
-            left="kr"
-            input={
-              <SmallNum
-                value={matTrekkKr}
-                onChange={setMatTrekkKr}
-                step={50}
-                w={100}
-                decimals={2}
-              />
-            }
-          />
-          <MiniLine
-            label="Utlegg"
-            left="kr"
-            input={
-              <SmallNum
-                value={utleggKr}
-                onChange={setUtleggKr}
-                step={50}
-                w={100}
-                decimals={2}
-              />
-            }
-          />
-        </div>
+{/* Mat trekk og Utlegg som kompakte rader */}
+<div className="mt-2 space-y-2">
+  <EditRow
+    label="Mat trekk"
+    unit="kr"
+    value={matTrekkKr}
+    onChange={setMatTrekkKr}
+    step={50}
+    w={100}
+    decimals={2}
+  />
+  <EditRow
+    label="Utlegg"
+    unit="kr"
+    value={utleggKr}
+    onChange={setUtleggKr}
+    step={50}
+    w={100}
+    decimals={2}
+  />
+</div>
 
-        {/* Utbetalt (etter matTrekk/utlegg) */}
-        <BarRow label="Utbetalt" value={`kr ${NOK(utbetalt)}`} tone="neutral" />
+{/* Utbetalt */}
+<BarRow label="Utbetalt" value={`kr ${NOK(utbetalt)}`} tone="neutral" />
 
         {/* Neste */}
         <div className="mt-5 flex justify-center">

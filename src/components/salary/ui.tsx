@@ -157,3 +157,35 @@ export function MiniLine({
     </div>
   );
 }
+// src/components/salary/ui.tsx  (legg til nederst sammen med de andre radene)
+export function EditRow({
+  label,
+  unit = 'kr',
+  value,
+  onChange,
+  step = 1,
+  w = 100,
+  decimals,
+}: {
+  label: string;
+  unit?: string;
+  value: number;
+  onChange: (v: number) => void;
+  step?: number;
+  w?: number;
+  decimals?: number;
+}) {
+  return (
+    <div
+      className="grid grid-cols-[1fr_auto_minmax(84px,128px)] items-center rounded-lg px-3 py-2"
+      style={{ border: '1px solid var(--border)' }}
+    >
+      <div className="text-sm">{label}</div>
+      <div className="mx-3 w-6 text-right text-xs font-semibold">{unit}</div>
+      <div className="justify-self-end">
+        <SmallNum value={value} onChange={onChange} step={step} w={w} decimals={decimals} />
+      </div>
+    </div>
+  );
+}
+
