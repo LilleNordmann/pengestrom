@@ -5,35 +5,40 @@ import { Chip, SmallNum } from './ui';
 
 export type ShiftMode = 'kr' | '%';
 
-export default function ShiftConfig({
-  shiftYes,
-  setShiftYes,
-  shiftMode,
-  setShiftMode,
-  kveldTillegg,
-  setKveldTillegg,
-  nattTillegg,
-  setNattTillegg,
-  kveldPreviewText,
-  nattPreviewText,
-}: {
+type Props = {
   shiftYes: boolean;
-  setShiftYes: (v: boolean) => void;
+  setShiftYesAction: (v: boolean) => void;   // ← nytt navn
+
   shiftMode: ShiftMode;
-  setShiftMode: (v: ShiftMode) => void;
+  setShiftModeAction: (v: ShiftMode) => void; // ← nytt navn
+
   kveldTillegg: number;
-  setKveldTillegg: (v: number) => void;
+  setKveldTilleggAction: (v: number) => void; // ← nytt navn
+
   nattTillegg: number;
-  setNattTillegg: (v: number) => void;
+  setNattTilleggAction: (v: number) => void;  // ← nytt navn
+
   kveldPreviewText?: string;
   nattPreviewText?: string;
-}) {
+};
+
+export default function ShiftConfig({
+  shiftYes,
+  setShiftYesAction,
+  shiftMode,
+  setShiftModeAction,
+  kveldTillegg,
+  setKveldTilleggAction,
+  nattTillegg,
+  setNattTilleggAction,
+  kveldPreviewText,
+  nattPreviewText,
+}: Props) {
   const handleNo = () => {
-    setShiftYes(false);
-    setKveldTillegg(0);
-    setNattTillegg(0);
-    // valgfritt: gå tilbake til 'kr' for å unngå misvisende %-preview neste gang
-    setShiftMode('kr');
+    setShiftYesAction(false);
+    setKveldTilleggAction(0);
+    setNattTilleggAction(0);
+    setShiftModeAction('kr'); // valgfritt fallback
   };
 
   return (
@@ -42,19 +47,18 @@ export default function ShiftConfig({
         Jobber du skift
       </div>
       <div className="mt-1 flex flex-wrap gap-2">
-        <Chip label="JA" active={shiftYes} onClick={() => setShiftYes(true)} />
-        <Chip label="NEI" active={!shiftYes} onClick={handleNo} />
+        <Chip label="JA"  active={shiftYes}     onClick={() => setShiftYesAction(true)} />
+        <Chip label="NEI" active={!shiftYes}    onClick={handleNo} />
       </div>
 
-      {/* Skjul hele seksjonen når NEI er valgt */}
       {shiftYes && (
         <>
           <div className="mt-2 text-xs font-semibold" style={{ color: 'var(--muted)' }}>
             Skifttillegg i
           </div>
           <div className="mt-1 flex flex-wrap gap-2">
-            <Chip label="Prosent" active={shiftMode === '%'} onClick={() => setShiftMode('%')} />
-            <Chip label="Kroner" active={shiftMode === 'kr'} onClick={() => setShiftMode('kr')} />
+            <Chip label="Prosent" active={shiftMode === '%'} onClick={() => setShiftModeAction('%')} />
+            <Chip label="Kroner"  active={shiftMode === 'kr'} onClick={() => setShiftModeAction('kr')} />
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -62,7 +66,7 @@ export default function ShiftConfig({
               label="Kveldstillegg"
               unit={shiftMode === 'kr' ? 'kr' : '%'}
               value={kveldTillegg}
-              onChange={setKveldTillegg}
+              onChange={setKveldTilleggAction}
               step={shiftMode === 'kr' ? 1 : 0.5}
               rightText={shiftMode === '%' ? (kveldPreviewText ?? '') : ''}
             />
@@ -70,7 +74,7 @@ export default function ShiftConfig({
               label="Natt­tillegg"
               unit={shiftMode === 'kr' ? 'kr' : '%'}
               value={nattTillegg}
-              onChange={setNattTillegg}
+              onChange={setNattTilleggAction}
               step={shiftMode === 'kr' ? 1 : 0.5}
               rightText={shiftMode === '%' ? (nattPreviewText ?? '') : ''}
             />
@@ -90,11 +94,11 @@ function Row({
   rightText,
 }: {
   label: string;
-  unit: string; // 'kr' | '%'
+  unit: string;
   value: number;
   onChange: (v: number) => void;
   step?: number;
-  rightText?: string; // vises høyrejustert (kun prosent-modus)
+  rightText?: string;
 }) {
   return (
     <div

@@ -1,21 +1,21 @@
 // src/components/salary/FastRatesPanel.tsx
 'use client';
 
+import { NOK } from '@/lib/format';
+
 type Props = {
-  NOK: (n: number) => string;
   monthlyGross: number;        // kr per måned
   annualHours: number;         // f.eks. 1950
-  setAnnualHours: (n: number) => void;
+  setAnnualHoursAction: (n: number) => void; // ← nytt navn
   baseHourly: number;          // (monthlyGross * 12) / annualHours
   ot50Rate: number;            // baseHourly * 1.5
   ot100Rate: number;           // baseHourly * 2
 };
 
 export default function FastRatesPanel({
-  NOK,
-  monthlyGross,
+  monthlyGross,        // (ikke brukt i visningen nå, men beholder om du trenger senere)
   annualHours,
-  setAnnualHours,
+  setAnnualHoursAction,
   baseHourly,
   ot50Rate,
   ot100Rate,
@@ -23,7 +23,10 @@ export default function FastRatesPanel({
   return (
     <div
       className="mt-3 rounded-xl border p-4"
-      style={{ background: 'var(--panel-accent, var(--card))', borderColor: 'var(--accent-border, var(--border))' }}
+      style={{
+        background: 'var(--panel-accent, var(--card))',
+        borderColor: 'var(--accent-border, var(--border))',
+      }}
     >
       <div className="flex flex-col gap-2">
         {/* Utregnet timelønn-linje med inline "timer i året" */}
@@ -39,7 +42,7 @@ export default function FastRatesPanel({
                 step={10}
                 min={1000}
                 max={2500}
-                onChange={(e) => setAnnualHours(Number(e.target.value))}
+                onChange={(e) => setAnnualHoursAction(Number(e.target.value))}
               />
               <span className="opacity-80">timer i året</span>
             </label>

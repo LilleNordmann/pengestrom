@@ -2,11 +2,19 @@
 'use client';
 import React from 'react';
 
-export function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+/* -------------------- Chip -------------------- */
+type ChipProps = {
+  label: string;
+  active: boolean;
+  onClickAction?: () => void;   // NYTT navn (trygt)
+  onClick?: () => void;         // GAMMELT navn (fallback)
+};
+export function Chip({ label, active, onClickAction, onClick }: ChipProps) {
+  const handle = onClickAction ?? onClick;
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handle}
       className={`rounded-full px-3 py-1 text-xs font-semibold transition ${active ? 'opacity-100' : 'opacity-60'}`}
       style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
     >
@@ -15,24 +23,29 @@ export function Chip({ label, active, onClick }: { label: string; active: boolea
   );
 }
 
+/* -------------------- SmallNum -------------------- */
 type SmallNumProps = {
   value: number;
-  onChange: (v: number) => void;
+  onChangeAction?: (v: number) => void;  // NYTT navn (trygt)
+  onChange?: (v: number) => void;        // GAMMELT navn (fallback)
   step?: number;
   min?: number;
   w?: number;
-  /** NY: antall desimaler å vise/normalisere til (f.eks. 2 for timer) */
+  /** Antall desimaler å normalisere til (f.eks. 2 for timer) */
   decimals?: number;
 };
 
 export function SmallNum({
   value,
+  onChangeAction,
   onChange,
   step = 1,
   min = 0,
   w = 80,
   decimals,
 }: SmallNumProps) {
+  const setVal = onChangeAction ?? onChange;
+
   const display =
     Number.isFinite(value)
       ? (decimals != null ? value.toFixed(decimals) : String(value))
@@ -48,26 +61,26 @@ export function SmallNum({
       step={step}
       min={min}
       onChange={(e) => {
-        // tillat både komma og punktum
         const raw = (e.target.value ?? '').replace(',', '.');
         if (raw === '') {
-          onChange(0);
+          setVal?.(0);
           return;
         }
         const n = parseFloat(raw);
-        if (!isNaN(n)) onChange(n);
+        if (!isNaN(n)) setVal?.(n);
       }}
       onBlur={(e) => {
         if (decimals != null) {
           const raw = (e.currentTarget.value ?? '').replace(',', '.');
           const n = parseFloat(raw);
-          if (!isNaN(n)) onChange(Number(n.toFixed(decimals)));
+          if (!isNaN(n)) setVal?.(Number(n.toFixed(decimals)));
         }
       }}
     />
   );
 }
 
+/* -------------------- TimeRow -------------------- */
 export function TimeRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div
@@ -81,6 +94,7 @@ export function TimeRow({ label, children }: { label: string; children: React.Re
   );
 }
 
+/* -------------------- KVRow / BarRow -------------------- */
 export function KVRow({ k, v }: { k: string; v: string }) {
   return (
     <div
@@ -98,16 +112,16 @@ export function BarRow({
   label,
   value,
   tone = 'accent',
-  className,        // NY
-  labelClassName,   // NY
-  valueClassName,   // NY
+  className,
+  labelClassName,
+  valueClassName,
 }: {
   label: string;
   value: string;
   tone?: 'accent' | 'neutral';
-  className?: string;       // NY: endre total tekststørrelse/padding
-  labelClassName?: string;  // NY: kun venstre tekst
-  valueClassName?: string;  // NY: kun høyre sum
+  className?: string;
+  labelClassName?: string;
+  valueClassName?: string;
 }) {
   const bg = tone === 'accent' ? 'var(--panel-accent)' : 'var(--card)';
   const bd = tone === 'accent' ? 'var(--accent-border)' : 'var(--border)';
@@ -117,13 +131,14 @@ export function BarRow({
       style={{ background: bg, border: `1px solid ${bd}` }}
     >
       <div className="flex items-center justify-between">
-        <span className={` ${labelClassName ?? ''}`}>{label}</span>
+        <span className={`${labelClassName ?? ''}`}>{label}</span>
         <span className={`tabular-nums ${valueClassName ?? ''}`}>{value}</span>
       </div>
     </div>
   );
 }
 
+/* -------------------- Panel/KV helpers -------------------- */
 export function PanelWarn({ children }: { children: React.ReactNode }) {
   return (
     <div className="my-3 rounded-lg p-3" style={{ background: 'var(--panel-warn)', border: '1px solid var(--warn-border)' }}>
@@ -150,6 +165,7 @@ export function KVFoot({ label, value }: { label: string; value: string }) {
   );
 }
 
+/* -------------------- MiniLine -------------------- */
 export function MiniLine({
   label,
   left,
@@ -174,12 +190,14 @@ export function MiniLine({
     </div>
   );
 }
-// src/components/salary/ui.tsx  (legg til nederst sammen med de andre radene)
+
+/* -------------------- EditRow -------------------- */
 export function EditRow({
   label,
   unit = 'kr',
   value,
-  onChange,
+  onChangeAction,     // NYTT navn (trygt)
+  onChange,           // GAMMELT navn (fallback)
   step = 1,
   w = 100,
   decimals,
@@ -187,11 +205,14 @@ export function EditRow({
   label: string;
   unit?: string;
   value: number;
-  onChange: (v: number) => void;
+  onChangeAction?: (v: number) => void;
+  onChange?: (v: number) => void;
   step?: number;
   w?: number;
   decimals?: number;
 }) {
+  const handle = onChangeAction ?? onChange;
+
   return (
     <div
       className="grid grid-cols-[1fr_auto_minmax(84px,128px)] items-center rounded-lg px-3 py-2"
@@ -200,9 +221,8 @@ export function EditRow({
       <div className="text-sm">{label}</div>
       <div className="mx-3 w-6 text-right text-xs font-semibold">{unit}</div>
       <div className="justify-self-end">
-        <SmallNum value={value} onChange={onChange} step={step} w={w} decimals={decimals} />
+        <SmallNum value={value} onChangeAction={handle} step={step} w={w} decimals={decimals} />
       </div>
     </div>
   );
 }
-

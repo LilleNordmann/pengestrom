@@ -1,25 +1,25 @@
-// src/components/salary/TabelltrekkPanel.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
 import { KVHeader, KVFoot, PanelWarn, SmallNum, Chip } from './ui';
+import { NOK } from '@/lib/format';
 
-type Mode = 'percent' | 'table'| 'kr' | 'amount';
+type Mode = 'percent' | 'table' | 'kr' | 'amount';
 
-export default function TabelltrekkPanel({
-  NOK,
-  bruttoTilTabell,
-  tabelltrekkKr,
-  setTabelltrekkKr,
-  initialMode = 'table',      // start på Tabell som før
-  initialPercent = 30,        // valgfri startprosent
-}: {
-  NOK: (n: number) => string;
+type Props = {
   bruttoTilTabell: number;
   tabelltrekkKr: number;
-  setTabelltrekkKr: (v: number) => void;
-  initialMode?: Mode;
-  initialPercent?: number;
-}) {
+  setTabelltrekkKrAction: (v: number) => void; // ← nytt navn
+  initialMode?: Mode;       // default: 'table'
+  initialPercent?: number;  // default: 30
+};
+
+export default function TabelltrekkPanel({
+  bruttoTilTabell,
+  tabelltrekkKr,
+  setTabelltrekkKrAction,
+  initialMode = 'table',
+  initialPercent = 30,
+}: Props) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [percent, setPercent] = useState<number>(initialPercent);
 
@@ -27,16 +27,13 @@ export default function TabelltrekkPanel({
   useEffect(() => {
     if (mode === 'percent') {
       const v = Math.max(0, (bruttoTilTabell * percent) / 100);
-      // runder til nærmeste hele krone
-      setTabelltrekkKr(Math.round(v));
+      setTabelltrekkKrAction(Math.round(v)); // runder til hele kroner
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, percent, bruttoTilTabell]);
+  }, [mode, percent, bruttoTilTabell, setTabelltrekkKrAction]);
 
   // Summen som vises i bunnlinjen
-  const sumTrekk = mode === 'percent'
-    ? Math.round((bruttoTilTabell * percent) / 100)
-    : tabelltrekkKr;
+  const sumTrekk =
+    mode === 'percent' ? Math.round((bruttoTilTabell * percent) / 100) : tabelltrekkKr;
 
   return (
     <PanelWarn>
@@ -57,18 +54,22 @@ export default function TabelltrekkPanel({
         v={`kr ${NOK(bruttoTilTabell)}`}
       />
 
-      {/* Innholdslinje varierer: prosentfelt ELLER trekktabell-felt */}
+      {/* Innholdslinje: prosentfelt ELLER trekktabell-felt */}
       <div className="mt-2 flex items-center justify-center gap-2">
         {mode === 'percent' ? (
           <>
-            <span className="text-sm" style={{ color: 'var(--muted)' }}>Prosent</span>
+            <span className="text-sm" style={{ color: 'var(--muted)' }}>
+              Prosent
+            </span>
             <SmallNum value={percent} onChange={setPercent} step={0.5} w={90} />
             <span className="text-sm" style={{ color: 'var(--muted)' }}>%</span>
           </>
         ) : (
           <>
-            <span className="text-sm" style={{ color: 'var(--muted)' }}>Trekktabell</span>
-            <SmallNum value={tabelltrekkKr} onChange={setTabelltrekkKr} step={100} w={90} />
+            <span className="text-sm" style={{ color: 'var(--muted)' }}>
+              Trekktabell
+            </span>
+            <SmallNum value={tabelltrekkKr} onChange={setTabelltrekkKrAction} step={100} w={90} />
           </>
         )}
       </div>

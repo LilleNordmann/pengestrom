@@ -1,27 +1,27 @@
-// src/components/salary/BruttoTable.tsx
 'use client';
 import React from 'react';
 import { BarRow, KVRow } from './ui';
+import { NOK } from '@/lib/format';
 
-export default function BruttoTable({
-  NOK,
-  timelonn,
-  kveld,
-  natt,
-  ot50,
-  ot100,
-  brutto,
-  shiftYes, // NY
-}: {
-  NOK: (n: number) => string;
+type Props = {
   timelonn: number;
   kveld: number;
   natt: number;
   ot50: number;
   ot100: number;
   brutto: number;
-  shiftYes: boolean; // NY
-}) {
+  shiftYes: boolean;
+};
+
+export default function BruttoTable({
+  timelonn,
+  kveld,
+  natt,
+  ot50,
+  ot100,
+  brutto,
+  shiftYes,
+}: Props) {
   return (
     <>
       <div className="mt-4">

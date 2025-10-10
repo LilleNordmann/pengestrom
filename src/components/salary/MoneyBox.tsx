@@ -1,18 +1,26 @@
-// src/components/salary/MoneyBox.tsx
 'use client';
 
 import React from 'react';
 
 type Props = {
   value: string;
-  onChange?: (v: string) => void;
   editable?: boolean;
   width?: number;
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
-  onBlur?: React.FocusEventHandler<HTMLInputElement>;
+
+  // Callbacks må slutte på "Action" for å unngå serialiseringsvarsel
+  onChangeAction?: (v: string) => void;
+  onKeyDownAction?: React.KeyboardEventHandler<HTMLInputElement>;
+  onBlurAction?: React.FocusEventHandler<HTMLInputElement>;
 };
 
-export default function MoneyBox({ value, onChange, editable = false, width = 90 }: Props) {
+export default function MoneyBox({
+  value,
+  editable = false,
+  width = 90,
+  onChangeAction,
+  onKeyDownAction,
+  onBlurAction,
+}: Props) {
   if (editable) {
     return (
       <input
@@ -20,10 +28,13 @@ export default function MoneyBox({ value, onChange, editable = false, width = 90
         className="ui-chip"
         style={{ width }}
         value={value}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(e) => onChangeAction?.(e.target.value)}
+        onKeyDown={onKeyDownAction}
+        onBlur={onBlurAction}
       />
     );
   }
+
   return (
     <div
       aria-readonly="true"
