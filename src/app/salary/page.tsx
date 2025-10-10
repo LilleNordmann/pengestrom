@@ -98,15 +98,32 @@ export default function SalaryPage() {
 
         {/* Toppsatser (første er redigerbar, de to andre er ren visning – alle med 2 desimaler) */}
         <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-          <TopLineEditable
-            label="Du har"
-            valueStr={hourlyStr}
-            setValueStr={setHourlyStr}
-            onBlur={commitHourly}
-            tail="i timelønn"
-          />
-          <TopLineDisplay label="Ved 50% overtid har du" value={NOK(ot50Rate)} tail="i timelønn" />
-          <TopLineDisplay label="Ved 100% overtid har du" value={NOK(ot100Rate)} tail="i timelønn" />
+          <div className="rounded-lg px-3 py-2 ui-panel">
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>Du har</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm font-bold">kr</span>
+              <MoneyBox editable value={hourlyStr} onChange={setHourlyStr} />
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
+            </div>
+          </div>
+
+          <div className="rounded-lg px-3 py-2 ui-panel">
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>Ved 50% overtid har du</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm font-bold">kr</span>
+              <MoneyBox value={NOK(ot50Rate)} />
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
+            </div>
+          </div>
+
+          <div className="rounded-lg px-3 py-2 ui-panel">
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>Ved 100% overtid har du</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm font-bold">kr</span>
+              <MoneyBox value={NOK(ot100Rate)} />
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>i timelønn</span>
+            </div>
+          </div>
         </div>
 
         {/* Skift */}
@@ -237,82 +254,39 @@ export default function SalaryPage() {
   );
 }
 
-/* ====== Små komponenter ====== */
+/* ====== Gjenbrukskomponenter ====== */
 
-// Øverste venstre: redigerbar timelønn med 2 desimaler (tekst-input som formatteres på blur)
-function TopLineEditable({
-  label,
-  valueStr,
-  setValueStr,
-  onBlur,
-  tail,
-}: {
-  label: string;
-  valueStr: string;
-  setValueStr: (s: string) => void;
-  onBlur: () => void;
-  tail?: string;
-}) {
-  return (
-    <div
-      className="rounded-lg px-3 py-2"
-      style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
-    >
-      <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
-      <div className="mt-1 flex items-center gap-2">
-        <span className="text-sm font-bold">kr</span>
-        <input
-          inputMode="decimal"
-          className="w-[90px] rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
-          style={{
-            background: 'var(--input-soft)',
-            borderColor: 'var(--input-ring)',
-            color: 'var(--input-fg)',
-          }}
-          value={valueStr}
-          onChange={(e) => setValueStr(e.target.value)}
-          onBlur={onBlur}
-        />
-        {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
-      </div>
-    </div>
-  );
-}
-
-// Øverste midt & høyre: kun visning – ser ikke ut som input
-function TopLineDisplay({
-  label,
+/** En boks som kan være input (editable) eller ren visning — deler samme look via .ui-chip */
+function MoneyBox({
   value,
-  tail,
+  onChange,
+  editable = false,
+  width = 90,
 }: {
-  label: string;
-  value: string; // ferdig formatert 2 desimaler
-  tail?: string;
+  value: string;
+  onChange?: (v: string) => void;
+  editable?: boolean;
+  width?: number;
 }) {
+  if (editable) {
+    return (
+      <input
+        inputMode="decimal"
+        className="ui-chip"
+        style={{ width }}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        onBlur={() => {/* blur håndteres i forelder (commitHourly) */}}
+      />
+    );
+  }
   return (
     <div
-      className="rounded-lg px-3 py-2"
-      style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
+      aria-readonly="true"
+      className="ui-chip select-none cursor-default"
+      style={{ width }}
     >
-      <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
-      <div className="mt-1 flex items-center gap-2">
-        <span className="text-sm font-bold">kr</span>
-
-        {/* Ser ut som input, men er ren visning */}
-        <div
-          aria-readonly="true"
-          className="w-[90px] rounded-md px-2 py-1 text-right font-semibold cursor-default select-none ring-1"
-          style={{
-            background: 'var(--input-soft)',
-            borderColor: 'var(--input-ring)',
-            color: 'var(--input-fg)',
-          }}
-        >
-          {value}
-        </div>
-
-        {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
-      </div>
+      {value}
     </div>
   );
 }
@@ -344,10 +318,7 @@ function MiniLine({
   return (
     <div>
       <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
-      <div
-        className="mt-1 flex items-center justify-between gap-2 rounded-lg px-3 py-2"
-        style={{ background: 'var(--panel-accent)', border: '1px solid var(--accent-border)' }}
-      >
+      <div className="mt-1 flex items-center justify-between gap-2 rounded-lg px-3 py-2 ui-panel">
         <div className="flex items-center gap-2">
           {left ? <span className="text-sm font-bold">{left}</span> : null}
           {input}
@@ -374,13 +345,8 @@ function SmallNum({
   return (
     <input
       type="number"
-      style={{
-        width: w,
-        background: 'var(--input-soft)',
-        borderColor: 'var(--input-ring)',
-        color: 'var(--input-fg)',
-      }}
-      className="rounded-md px-2 py-1 text-right font-semibold outline-none ring-1 focus:ring-2"
+      className="ui-chip"
+      style={{ width: w }}
       value={Number.isFinite(value) ? value : 0}
       step={step}
       min={min}

@@ -1,8 +1,7 @@
 /* src/app/globals.css */
 @import "tailwindcss";
 
-/* === Design tokens === */
-/* ==== App design tokens (dark-only) ==== */
+/* === Design tokens (dark) === */
 :root {
   --bg: #0b0b0c;          /* sidebakgrunn (svart) */
   --fg: #f5f6f7;          /* standard tekst (lys) */
@@ -23,43 +22,55 @@
   --input-fg: #eaf0f6;       /* tekst i input */
 }
 
-/* ==== Base ==== */
-@layer base {
-  html, body { background: var(--bg); color: var(--fg); }
-  a { color: var(--fg); text-decoration: none; }
-  a:hover { opacity: .9; }
+/* === UI primitives === */
+.ui-chip {
+  /* Tailwind helpers via @apply der det er praktisk */
+  @apply rounded-md px-2 py-1 text-right font-semibold outline-none;
+  background: var(--input-soft);
+  border: 1px solid var(--input-ring);
+  color: var(--input-fg);
+  font-variant-numeric: tabular-nums;
+}
+.ui-chip:focus {
+  /* enkel fokusindikator (matcher “ring”-følelse) */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--input-ring) 65%, transparent);
+}
+.ui-panel {
+  background: var(--panel-accent);
+  border: 1px solid var(--accent-border);
 }
 
-
-/* Tailwind v4 @theme-variabler (beholder font-variablene dine) */
+/* ==== Tailwind v4 @theme (kobler Tailwind-variabler til dine tokens) ==== */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
   --font-sans: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* === Base === */
 @layer base {
-  html { color-scheme: dark; }
-  html, body { min-height: 100%; }
-
+  html {
+    color-scheme: dark;
+  }
+  html, body {
+    min-height: 100%;
+  }
   body {
-     background: var(--bg); color: var(--fg);
-    color: var(--foreground);
-     font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
-}
-
-  /* Unngå @apply i v4 – bruk ren CSS */
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   a {
-    color: var(--foreground);
+    color: var(--fg);
     text-decoration: none;
   }
-  a:hover { opacity: 0.8; }
+  a:hover { opacity: .9; }
 }
 
 /* === Utilities === */
 @layer utilities {
-  /* For iOS statuslinje (black-translucent) */
   .safe-top { padding-top: env(safe-area-inset-top); }
 }
