@@ -145,6 +145,8 @@ export default function SalaryPage() {
           bruttoTilTabell={bruttoTilTabell}
           tabelltrekkKr={tabelltrekkKr}
           setTabelltrekkKr={setTabelltrekkKr}
+          initialMode="percent"      // valgfritt
+  initialPercent={30}        // valgfritt
         />
 
         <OvertidSkattPanel
