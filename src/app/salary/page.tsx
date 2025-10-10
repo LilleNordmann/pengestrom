@@ -297,13 +297,29 @@ function TopLineDisplay({
       <div className="text-xs" style={{ color: 'var(--muted)' }}>{label}</div>
       <div className="mt-1 flex items-center gap-2">
         <span className="text-sm font-bold">kr</span>
+
+        {/* Visnings-chip (ikke input) */}
         <span
-          className="inline-block w-[90px] rounded-md px-2 py-1 text-right font-semibold select-none cursor-default"
-          style={{ background: 'var(--input-soft)', border: '1px solid var(--input-ring)', color: 'var(--input-fg)' }}
-          aria-hidden="true"
+          aria-disabled="true"
+          title="Autoutregnet"
+          className="inline-block select-none"
+          style={{
+            width: 90,
+            textAlign: 'right',
+            padding: '6px 10px',
+            borderRadius: 8,
+            fontWeight: 700,
+            cursor: 'default',
+            fontVariantNumeric: 'tabular-nums',
+            // egen, mykere 'display'-stil så den ikke ser ut som et inputfelt
+            background: 'rgba(140, 170, 255, 0.14)',
+            border: '1px solid rgba(140, 170, 255, 0.25)',
+            color: 'var(--input-fg)',
+          }}
         >
           {value}
         </span>
+
         {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
       </div>
     </div>
