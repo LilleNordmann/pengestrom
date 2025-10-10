@@ -163,8 +163,11 @@ export default function SalaryPage() {
         />
 
        {/* Totalt skattetrekk */}
-<BarRow label="Totalt Skattetrekk" value={`kr ${NOK(totalSkatt)}`} />
-
+<BarRow
+  label="Totalt Skattetrekk"
+  value={`kr ${NOK(totalSkatt)}`}
+  className="text-base"            // hele raden ett hakk større
+/>
 {/* Mat trekk og Utlegg som kompakte rader */}
 <div className="mt-2 space-y-2">
   <EditRow
@@ -188,8 +191,14 @@ export default function SalaryPage() {
 </div>
 
 {/* Utbetalt */}
-<BarRow label="Utbetalt" value={`kr ${NOK(utbetalt)}`} tone="neutral" />
-
+{/* Stor “Utbetalt” og ekstra stor sum */}
+<BarRow
+  label="Utbetalt"
+  value={`kr ${NOK(utbetalt)}`}
+  tone="neutral"
+  className="text-lg"              // øker basis-størrelse på raden
+  valueClassName="text-2xl font-extrabold"  // gjør selve summen ekstra tydelig
+/>
         {/* Neste */}
         <div className="mt-5 flex justify-center">
           <Link

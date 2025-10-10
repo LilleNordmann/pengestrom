@@ -94,14 +94,31 @@ export function KVRow({ k, v }: { k: string; v: string }) {
   );
 }
 
-export function BarRow({ label, value, tone = 'accent' }: { label: string; value: string; tone?: 'accent' | 'neutral' }) {
+export function BarRow({
+  label,
+  value,
+  tone = 'accent',
+  className,        // NY
+  labelClassName,   // NY
+  valueClassName,   // NY
+}: {
+  label: string;
+  value: string;
+  tone?: 'accent' | 'neutral';
+  className?: string;       // NY: endre total tekststørrelse/padding
+  labelClassName?: string;  // NY: kun venstre tekst
+  valueClassName?: string;  // NY: kun høyre sum
+}) {
   const bg = tone === 'accent' ? 'var(--panel-accent)' : 'var(--card)';
   const bd = tone === 'accent' ? 'var(--accent-border)' : 'var(--border)';
   return (
-    <div className="my-3 rounded-lg px-3 py-2 text-sm font-semibold" style={{ background: bg, border: `1px solid ${bd}` }}>
+    <div
+      className={`my-3 rounded-lg px-3 py-2 text-sm font-semibold ${className ?? ''}`}
+      style={{ background: bg, border: `1px solid ${bd}` }}
+    >
       <div className="flex items-center justify-between">
-        <span>{label}</span>
-        <span className="tabular-nums">{value}</span>
+        <span className={` ${labelClassName ?? ''}`}>{label}</span>
+        <span className={`tabular-nums ${valueClassName ?? ''}`}>{value}</span>
       </div>
     </div>
   );
