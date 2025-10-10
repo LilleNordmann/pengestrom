@@ -366,13 +366,13 @@ export default function SalaryPage() {
           </div>
         )}
 
-        {/* Neste */}
+        {/* Til Dashbord */}
         <div className="mt-5 flex justify-center">
           <Link
             href="/dashboard"
             className="w-full max-w-[260px] rounded-2xl bg-white py-3 text-center font-semibold text-black transition hover:opacity-90"
           >
-            Neste
+            Til Dashbord
           </Link>
         </div>
       </div>
