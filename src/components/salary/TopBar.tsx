@@ -8,8 +8,8 @@ type Props = {
   hourlyStr: string;
   setHourlyStr: (s: string) => void;
   onCommitHourly: () => void;
-  ot50Text: string;   // ferdig formatert "375,00"
-  ot100Text: string;  // ferdig formatert "500,00"
+  ot50Text: string;
+  ot100Text: string;
 };
 
 export default function TopBar({
@@ -21,53 +21,60 @@ export default function TopBar({
 }: Props) {
   return (
     <div className="mb-4 rounded-lg px-4 py-3 ui-panel">
-      {/* Fleksibel, bryter pent på små skjermer */}
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-        {/* Timelønn (redigerbar) */}
-        <InlineBlock label="Timelønn">
-          <span className="mx-2 text-sm font-bold">kr</span>
+      {/* Mobil: grid med rader. Desktop: ligg på linje med gap */}
+      <div className="grid gap-3 md:flex md:flex-wrap md:items-center md:gap-x-8 md:gap-y-3">
+        <InlineKV label="Timelønn" valueNode={
           <MoneyBox
             editable
             value={hourlyStr}
             onChange={setHourlyStr}
-            // commit ved Enter/blur så verdien formatteres
-            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter') onCommitHourly();
             }}
             onBlur={onCommitHourly}
           />
-        </InlineBlock>
+        } />
 
-        {/* 50% overtid (visning) */}
-        <InlineBlock label="50% overtid">
-          <span className="mx-2 text-sm font-bold">kr</span>
-          <span className="tabular-nums text-lg font-bold">{ot50Text}</span>
-        </InlineBlock>
+        <InlineKV label="50% overtid" valueNode={
+          <span className="tabular-nums text-base md:text-lg font-extrabold">{ot50Text}</span>
+        } />
 
-        {/* 100% overtid (visning) */}
-        <InlineBlock label="100% overtid">
-          <span className="mx-2 text-sm font-bold">kr</span>
-          <span className="tabular-nums text-lg font-bold">{ot100Text}</span>
-        </InlineBlock>
+        <InlineKV label="100% overtid" valueNode={
+          <span className="tabular-nums text-base md:text-lg font-extrabold">{ot100Text}</span>
+        } />
       </div>
     </div>
   );
 }
 
-/** Liten hjelpekomponent for "Label  kr  Value" på én linje */
-function InlineBlock({
+/** Viser "Label | kr | Verdi".
+ *  - Mobil: grid med tre kolonner (label venstre, "kr" midt, verdi høyre)
+ *  - Desktop (md+): flex på én linje med små mellomrom
+ */
+function InlineKV({
   label,
-  children,
+  valueNode,
 }: {
   label: string;
-  children: React.ReactNode;
+  valueNode: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center">
-      <span className="mr-2 text-xs" style={{ color: 'var(--muted)' }}>
+    <div
+      className="
+        grid w-full grid-cols-[1fr_auto_auto] items-center
+        md:w-auto md:grid-cols-none md:flex md:items-center md:gap-2
+      "
+    >
+      <span className="text-xs md:text-xs" style={{ color: 'var(--muted)' }}>
         {label}
       </span>
-      {children}
+
+      <span className="mx-2 text-sm font-bold md:mx-0">kr</span>
+
+      {/* På mobil: høyrejuster verdien; desktop: normal */}
+      <div className="justify-self-end md:justify-self-auto">
+        {valueNode}
+      </div>
     </div>
   );
 }
