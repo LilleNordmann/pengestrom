@@ -41,13 +41,13 @@ export default function TopBar({
         {/* 50% overtid (visning) */}
         <InlineBlock label="50% overtid">
           <span className="mx-2 text-sm font-bold">kr</span>
-          <span className="tabular-nums text-lg font-extrabold">{ot50Text}</span>
+          <span className="tabular-nums text-lg font-bold">{ot50Text}</span>
         </InlineBlock>
 
         {/* 100% overtid (visning) */}
         <InlineBlock label="100% overtid">
           <span className="mx-2 text-sm font-bold">kr</span>
-          <span className="tabular-nums text-lg font-extrabold">{ot100Text}</span>
+          <span className="tabular-nums text-lg font-bold">{ot100Text}</span>
         </InlineBlock>
       </div>
     </div>
