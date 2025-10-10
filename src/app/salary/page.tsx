@@ -298,27 +298,18 @@ function TopLineDisplay({
       <div className="mt-1 flex items-center gap-2">
         <span className="text-sm font-bold">kr</span>
 
-        {/* Visnings-chip (ikke input) */}
-        <span
-          aria-disabled="true"
-          title="Autoutregnet"
-          className="inline-block select-none"
+        {/* Ser ut som input, men er ren visning */}
+        <div
+          aria-readonly="true"
+          className="w-[90px] rounded-md px-2 py-1 text-right font-semibold cursor-default select-none ring-1"
           style={{
-            width: 90,
-            textAlign: 'right',
-            padding: '6px 10px',
-            borderRadius: 8,
-            fontWeight: 700,
-            cursor: 'default',
-            fontVariantNumeric: 'tabular-nums',
-            // egen, mykere 'display'-stil så den ikke ser ut som et inputfelt
-            background: 'rgba(140, 170, 255, 0.14)',
-            border: '1px solid rgba(140, 170, 255, 0.25)',
+            background: 'var(--input-soft)',
+            borderColor: 'var(--input-ring)',
             color: 'var(--input-fg)',
           }}
         >
           {value}
-        </span>
+        </div>
 
         {tail ? <span className="text-xs" style={{ color: 'var(--muted)' }}>{tail}</span> : null}
       </div>
@@ -418,7 +409,7 @@ function KVRow({ k, v }: { k: string; v: string }) {
       style={{ borderBottom: '1px solid var(--border)' }}
     >
       <div className="text-xs" style={{ color: 'var(--muted)' }}>{k}</div>
-      <div className="mx-3 w-6 text-right text-xs font-semibold">kr</div>
+      <div className="mx-3 w-6 text-right text-xs" style={{ color: 'var(--muted)' }}>kr</div>
       <div className="tabular-nums text-sm">{v}</div>
     </div>
   );
