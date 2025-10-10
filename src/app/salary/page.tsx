@@ -19,13 +19,13 @@ export default function SalaryPage() {
 
   const [shiftYes, setShiftYes] = useState<boolean>(false);
   const [shiftMode, setShiftMode] = useState<ShiftMode>('kr');
-  const [kveldTillegg, setKveldTillegg] = useState<number>(20);
-  const [nattTillegg, setNattTillegg] = useState<number>(50);
+  const [kveldTillegg, setKveldTillegg] = useState<number>(0);
+  const [nattTillegg, setNattTillegg] = useState<number>(0);
 
   const [hVanlig, setHVanlig] = useState<number>(150);
-  const [hHellig, setHHellig] = useState<number>(16);
-  const [hKveld, setHKveld] = useState<number>(40);
-  const [hNatt, setHNatt] = useState<number>(10);
+  const [hHellig, setHHellig] = useState<number>(8);
+  const [hKveld, setHKveld] = useState<number>(4);
+  const [hNatt, setHNatt] = useState<number>(1);
   const [hOT50, setHOT50] = useState<number>(4);
   const [hOT100, setHOT100] = useState<number>(5);
 
@@ -136,6 +136,7 @@ export default function SalaryPage() {
           ot50={ot50}
           ot100={ot100}
           brutto={brutto}
+          shiftYes={shiftYes}
         />
 
         {/* Skattepaneler */}
