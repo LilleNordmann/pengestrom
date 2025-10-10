@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { KVHeader, KVFoot, PanelWarn, SmallNum, Chip } from './ui';
 
-type Mode = 'percent' | 'table';
+type Mode = 'percent' | 'table'| 'kr' | 'amount';
 
 export default function TabelltrekkPanel({
   NOK,

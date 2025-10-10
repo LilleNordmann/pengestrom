@@ -11,14 +11,21 @@ import TabelltrekkPanel from '@/components/salary/TabelltrekkPanel';
 import OvertidSkattPanel from '@/components/salary/OvertidSkattPanel';
 import { BarRow, EditRow } from '@/components/salary/ui';
 
+// NYE komponenter
+import FastRatesPanel from '@/components/salary/FastRatesPanel';
+import FastOvertimeHours from '@/components/salary/FastOvertimeHours';
+
 export default function SalaryPage() {
-  // === Ny: velger for lønnstype ===
+  // === Velger for lønnstype ===
   const [salaryType, setSalaryType] = useState<'timelønn' | 'fastlønn'>('timelønn');
 
-  // === Timelønn state ===
-  const [hourly, setHourly] = useState<number>(250);
+  // === Felles formatering ===
   const formatNOK = (n: number) =>
     n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const NOK = (n: number) => formatNOK(n);
+
+  // === TIMELØNN STATE ===
+  const [hourly, setHourly] = useState<number>(250);
   const [hourlyStr, setHourlyStr] = useState<string>(formatNOK(hourly));
 
   const [shiftYes, setShiftYes] = useState<boolean>(false);
@@ -49,7 +56,6 @@ export default function SalaryPage() {
   const kveld = shiftYes
     ? (shiftMode === 'kr' ? hKveld * kveldTillegg : hKveld * hourly * (kveldTillegg / 100))
     : 0;
-
   const natt = shiftYes
     ? (shiftMode === 'kr' ? hNatt * nattTillegg : hNatt * hourly * (nattTillegg / 100))
     : 0;
@@ -58,17 +64,13 @@ export default function SalaryPage() {
   const ot100 = hOT100 * ot100Rate;
 
   const brutto = timelonn + kveld + natt + ot50 + ot100;
-
   const bruttoTilTabell = timelonn + kveld + natt;
   const bruttoOvertid = ot50 + ot100;
 
   const skattOvertid = bruttoOvertid * (overtidSkattProsent / 100);
   const totalSkatt = tabelltrekkKr + skattOvertid;
 
-  // Utbetalt (timelønn)
   const utbetalt = brutto - totalSkatt - matTrekkKr + utleggKr;
-
-  const NOK = (n: number) => formatNOK(n);
 
   const parseNOK = (s: string): number | null => {
     const cleaned = s.replace(/\s/g, '').replace(',', '.');
@@ -86,17 +88,43 @@ export default function SalaryPage() {
     setHourlyStr(formatNOK(parsed));
   };
 
-  // Kr-preview for prosent-modus (per time)
   const kveldPreviewText = `kr ${NOK(hourly * (kveldTillegg / 100))}`;
   const nattPreviewText  = `kr ${NOK(hourly * (nattTillegg / 100))}`;
 
-  // === Fastlønn: enkel førsteversjon ===
+  // === FASTLØNN STATE ===
   const [monthlyGross, setMonthlyGross] = useState<number>(45000);
+  const [annualHours, setAnnualHours]   = useState<number>(1950); // redigerbar i panelet
+
+  // Overtidstimer (fastlønn)
+  const [fastHOT50, setFastHOT50] = useState<number>(4);
+  const [fastHOT100, setFastHOT100] = useState<number>(5);
+
+  // Trekk/skatt (fastlønn)
   const [fastTabelltrekk, setFastTabelltrekk] = useState<number>(12000);
   const [fastMatTrekk, setFastMatTrekk] = useState<number>(0);
   const [fastUtlegg, setFastUtlegg] = useState<number>(0);
 
-  const fastUtbetalt = monthlyGross - fastTabelltrekk - fastMatTrekk + fastUtlegg;
+  // Avledede satser for fastlønn
+  const fastBaseHourly = useMemo(
+    () => (annualHours > 0 ? (monthlyGross * 12) / annualHours : 0),
+    [monthlyGross, annualHours]
+  );
+  const fastOT50Rate = useMemo(() => fastBaseHourly * 1.5, [fastBaseHourly]);
+  const fastOT100Rate = useMemo(() => fastBaseHourly * 2, [fastBaseHourly]);
+
+  // Overtid (fastlønn)
+  const fastOT50 = fastHOT50 * fastOT50Rate;
+  const fastOT100 = fastHOT100 * fastOT100Rate;
+
+  // Brutto / skattegrunnlag (fastlønn)
+  const fastBrutto = monthlyGross + fastOT50 + fastOT100;
+  const fastBruttoTilTabell = monthlyGross; // fastlønn til tabell
+  const fastBruttoOvertid = fastOT50 + fastOT100;
+
+  const fastSkattOvertid = fastBruttoOvertid * (overtidSkattProsent / 100); // gjenbruk sats
+  const fastTotalSkatt = fastTabelltrekk + fastSkattOvertid;
+
+  const fastUtbetalt = fastBrutto - fastTotalSkatt - fastMatTrekk + fastUtlegg;
 
   return (
     <main className="mx-auto max-w-[680px] p-4">
@@ -106,7 +134,7 @@ export default function SalaryPage() {
       >
         <h1 className="mb-4 text-center text-2xl font-extrabold">Lønnsutregning</h1>
 
-        {/* === Velger: Timelønn / Fastlønn (side-om-side) === */}
+        {/* Velger: Timelønn / Fastlønn */}
         <div className="mb-5 flex items-center gap-2">
           <button
             type="button"
@@ -132,16 +160,14 @@ export default function SalaryPage() {
           </button>
         </div>
 
-        {/* === TIMELØNN-SEKSJON === */}
+        {/* === TIMELØNN === */}
         {salaryType === 'timelønn' && (
           <div
             onBlur={(e) => {
-              // Commit timelønn-input når fokus forlater timelønn-seksjonen
               if (e.currentTarget.contains(e.relatedTarget as Node)) return;
               commitHourly();
             }}
           >
-            {/* Topp: timelønn + 50/100% satser */}
             <TopBar
               hourlyStr={hourlyStr}
               setHourlyStr={setHourlyStr}
@@ -150,7 +176,6 @@ export default function SalaryPage() {
               ot100Text={NOK(ot100Rate)}
             />
 
-            {/* Skift-konfig */}
             <ShiftConfig
               shiftYes={shiftYes}
               setShiftYes={setShiftYes}
@@ -164,7 +189,6 @@ export default function SalaryPage() {
               nattPreviewText={nattPreviewText}
             />
 
-            {/* Timer */}
             <HoursInput
               shiftYes={shiftYes}
               hVanlig={hVanlig} setHVanlig={setHVanlig}
@@ -175,7 +199,6 @@ export default function SalaryPage() {
               hOT100={hOT100}   setHOT100={setHOT100}
             />
 
-            {/* Brutto-lønn + total bruttolønn */}
             <BruttoTable
               NOK={NOK}
               timelonn={timelonn}
@@ -187,7 +210,6 @@ export default function SalaryPage() {
               shiftYes={shiftYes}
             />
 
-            {/* Skattepaneler */}
             <TabelltrekkPanel
               NOK={NOK}
               bruttoTilTabell={bruttoTilTabell}
@@ -205,14 +227,12 @@ export default function SalaryPage() {
               skattOvertid={skattOvertid}
             />
 
-            {/* Totalt skattetrekk */}
             <BarRow
               label="Totalt Skattetrekk"
               value={`kr ${NOK(totalSkatt)}`}
               className="text-base"
             />
 
-            {/* Mat trekk og Utlegg (timelønn) */}
             <div className="mt-2 space-y-2">
               <EditRow
                 label="Mat trekk"
@@ -234,7 +254,6 @@ export default function SalaryPage() {
               />
             </div>
 
-            {/* Utbetalt */}
             <BarRow
               label="Utbetalt"
               value={`kr ${NOK(utbetalt)}`}
@@ -245,13 +264,14 @@ export default function SalaryPage() {
           </div>
         )}
 
-        {/* === FASTLØNN-SEKSJON (enkel førsteversjon) === */}
+        {/* === FASTLØNN === */}
         {salaryType === 'fastlønn' && (
           <div className="mt-2">
             <div className="rounded-xl border p-4"
                  style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
               <h2 className="mb-3 text-lg font-semibold">Fastlønn</h2>
 
+              {/* Månedslønn (brutto) */}
               <EditRow
                 label="Månedslønn (brutto)"
                 unit="kr"
@@ -262,18 +282,55 @@ export default function SalaryPage() {
                 decimals={2}
               />
 
-              <div className="mt-2">
-                <EditRow
-                  label="Tabelltrekk"
-                  unit="kr"
-                  value={fastTabelltrekk}
-                  onChange={setFastTabelltrekk}
-                  step={500}
-                  w={140}
-                  decimals={2}
+              {/* Panel: utregnede satser */}
+              <FastRatesPanel
+                NOK={NOK}
+                monthlyGross={monthlyGross}
+                annualHours={annualHours}
+                setAnnualHours={setAnnualHours}
+                baseHourly={fastBaseHourly}
+                ot50Rate={fastOT50Rate}
+                ot100Rate={fastOT100Rate}
+              />
+
+              {/* Panel: skriv inn OT-timer */}
+              <FastOvertimeHours
+                hOT50={fastHOT50}
+                setHOT50={setFastHOT50}
+                hOT100={fastHOT100}
+                setHOT100={setFastHOT100}
+              />
+
+              {/* Skattepaneler (gjenbruk) */}
+              <div className="mt-4">
+                <TabelltrekkPanel
+                  NOK={NOK}
+                  bruttoTilTabell={fastBruttoTilTabell}
+                  tabelltrekkKr={fastTabelltrekk}
+                  setTabelltrekkKr={setFastTabelltrekk}
+                  initialMode="amount"   // fastlønn: vis kr som standard
+                  initialPercent={30}
                 />
               </div>
 
+              <div className="mt-3">
+                <OvertidSkattPanel
+                  NOK={NOK}
+                  bruttoOvertid={fastBruttoOvertid}
+                  overtidSkattProsent={overtidSkattProsent}
+                  setOvertidSkattProsent={setOvertidSkattProsent}
+                  skattOvertid={fastSkattOvertid}
+                />
+              </div>
+
+              {/* Totalt skattetrekk for fastlønn */}
+              <BarRow
+                label="Totalt Skattetrekk"
+                value={`kr ${NOK(fastTotalSkatt)}`}
+                className="mt-1 text-base"
+              />
+
+              {/* Mat trekk / Utlegg */}
               <div className="mt-2 space-y-2">
                 <EditRow
                   label="Mat trekk"
@@ -295,10 +352,11 @@ export default function SalaryPage() {
                 />
               </div>
 
+              {/* Utbetalt */}
               <div className="mt-3">
                 <BarRow
                   label="Utbetalt"
-                  value={`kr ${formatNOK(fastUtbetalt)}`}
+                  value={`kr ${NOK(fastUtbetalt)}`}
                   tone="neutral"
                   className="text-lg"
                   valueClassName="text-2xl font-extrabold"
@@ -311,7 +369,7 @@ export default function SalaryPage() {
         {/* Neste */}
         <div className="mt-5 flex justify-center">
           <Link
-            href="/"
+            href="/dashboard"
             className="w-full max-w-[260px] rounded-2xl bg-white py-3 text-center font-semibold text-black transition hover:opacity-90"
           >
             Neste
